@@ -1,0 +1,388 @@
+{
+  "company": {
+    "name": "Saryarqa Routes",
+    "product": "Saryarqa Go",
+    "assistant": "Tulpar",
+    "founded": 2020,
+    "city": "Astana",
+    "staff": 9,
+    "guides": 25,
+    "travelers2025": 3400,
+    "licence": "Tour operator licence No. KZ-TUR-DEMO-0001 (prototype placeholder)",
+    "insurance": "Every traveler is covered by accident insurance for the whole trip (included in price)",
+    "whatsapp": "+7 700 000 00 00 (demo number)",
+    "note": "Saryarqa Routes is the fictional company from the Zerttex Hackathon 2026 case. This prototype uses sample data."
+  },
+  "rates": {
+    "source": "National Bank of Kazakhstan official rates, 25 Oct 2026",
+    "KZT": 1,
+    "INR": 4.75,
+    "USD": 451.05
+  },
+  "policies": {
+    "deposit": "Pay 20% now to hold your seats, the rest up to 48 hours before departure.",
+    "cancellation": "Free cancellation up to 72 hours before departure. Cancel later and we refund 50%.",
+    "weather": "If the park closes or weather is unsafe, we move your trip to another date or refund 100%.",
+    "promise": "Saryarqa Promise: if we cancel, you get 100% back within 5 working days.",
+    "payments": "Visa, Mastercard and other international cards with 3-D Secure, Apple Pay and Google Pay. Charged in Kazakhstan tenge with no hidden fees; the rupee price is an estimate at the National Bank rate.",
+    "indianCards": "Indian bank cards: switch on international and online use in your bank app before paying (RBI rules keep it off by default on new cards).",
+    "split": "Travelling with friends? Split the trip and each person pays their own share by link.",
+    "visa": "Indian citizens can visit Kazakhstan without a visa for up to 14 days (passport valid 90+ days). Hotels register you in the eQonaq system automatically.",
+    "flights": "Direct flights connect Delhi and Almaty in about 3.5 hours.",
+    "food": "Every trip has vegetarian meals. Jain and halal meals on request. Tell us at booking.",
+    "privacy": "We collect only what the trip needs. Card details never reach our servers: payment is handled by a licensed Kazakhstan acquiring bank.",
+    "changes": "Free date change up to 72 hours before departure, as long as seats are available on the new date.",
+    "upi": "UPI is not available for payments to Kazakhstan yet. Please use a Visa or Mastercard card (credit, debit or forex card), Apple Pay or Google Pay.",
+    "groups": "Small groups of 10 to 14 travelers depending on the route. Private trips for your own group are available on request.",
+    "insurance": "Accident insurance for the whole trip is included in every price. We still recommend your own travel and medical insurance."
+  },
+  "trips": [
+    {
+      "id": "kolsai-kaindy",
+      "name": "Kolsai & Kaindy Lakes",
+      "short": "Kolsai",
+      "region": "Almaty region",
+      "start": "Almaty",
+      "days": 3,
+      "priceKZT": 79000,
+      "scene": "lake",
+      "tagline": "Turquoise mountain lakes and a forest growing out of the water.",
+      "difficulty": "Easy to moderate walks, up to 8 km a day",
+      "groupSize": "Small group, max 12",
+      "season": "May to October",
+      "departures": [
+        1,
+        5
+      ],
+      "seatsBase": 12,
+      "guide": "aigerim",
+      "highlights": [
+        "Lower Kolsai lake at sunrise",
+        "Sunken spruce forest of Kaindy",
+        "Night in a mountain guesthouse in Saty village",
+        "Charyn Canyon viewpoint on the way back"
+      ],
+      "itinerary": [
+        {
+          "day": 1,
+          "title": "Almaty to Saty village",
+          "text": "Hotel pickup at 7:00. Drive through the Chilik valley, lunch on the road, walk around Lower Kolsai lake. Dinner and night in a family guesthouse."
+        },
+        {
+          "day": 2,
+          "title": "Kaindy lake and the upper trail",
+          "text": "Off-road ride to Kaindy, where dead spruce trunks rise out of blue water. Afternoon hike to the Kolsai viewpoint (optional horse ride)."
+        },
+        {
+          "day": 3,
+          "title": "Charyn Canyon and back to Almaty",
+          "text": "Stop at the Charyn Canyon rim for the Valley of Castles view. Back in Almaty by 19:00."
+        }
+      ],
+      "included": [
+        "transport",
+        "guide",
+        "fees",
+        "stay",
+        "meals",
+        "water",
+        "insurance",
+        "pass"
+      ],
+      "notIncluded": [
+        "Flights to Almaty",
+        "Horse ride at Kolsai (about 7,000 ₸)",
+        "Boat rental on the lake",
+        "Single room supplement"
+      ],
+      "pickup": "Your hotel in Almaty, 7:00"
+    },
+    {
+      "id": "charyn-canyon",
+      "name": "Charyn Canyon",
+      "short": "Charyn",
+      "region": "Almaty region",
+      "start": "Almaty",
+      "days": 2,
+      "priceKZT": 58000,
+      "scene": "canyon",
+      "tagline": "Red stone towers and the Valley of Castles, 200 km from Almaty.",
+      "difficulty": "Easy, 5 km canyon floor walk",
+      "groupSize": "Small group, max 12",
+      "season": "All year (best March to June and September to November)",
+      "departures": [
+        2,
+        6
+      ],
+      "seatsBase": 12,
+      "guide": "daulet",
+      "highlights": [
+        "Valley of Castles walk to the Charyn river",
+        "Sunset on the canyon rim",
+        "Eco-camp yurt night",
+        "Black Canyon viewpoint"
+      ],
+      "itinerary": [
+        {
+          "day": 1,
+          "title": "Almaty to the Valley of Castles",
+          "text": "Pickup at 8:00, arrive at Charyn for lunch. Walk the canyon floor to the river, sunset at the rim, dinner and night in a yurt eco-camp."
+        },
+        {
+          "day": 2,
+          "title": "Black Canyon and return",
+          "text": "Sunrise photos, breakfast, drive to the Black Canyon viewpoint and the Moon Canyon. Back in Almaty by 18:00."
+        }
+      ],
+      "included": [
+        "transport",
+        "guide",
+        "fees",
+        "stay",
+        "meals",
+        "water",
+        "insurance",
+        "pass"
+      ],
+      "notIncluded": [
+        "Flights to Almaty",
+        "Eco-car ride inside the canyon (about 1,000 ₸)",
+        "Drinks other than water"
+      ],
+      "pickup": "Your hotel in Almaty, 8:00"
+    },
+    {
+      "id": "turkestan",
+      "name": "Turkestan Silk Road",
+      "short": "Turkestan",
+      "region": "Turkestan region",
+      "start": "Turkestan",
+      "days": 3,
+      "priceKZT": 72000,
+      "scene": "heritage",
+      "tagline": "A UNESCO mausoleum, a Silk Road ghost city and evening lights at Caravanserai.",
+      "difficulty": "Easy, mostly flat walking",
+      "groupSize": "Small group, max 14",
+      "season": "March to May and September to November",
+      "departures": [
+        3,
+        6
+      ],
+      "seatsBase": 14,
+      "guide": "madina",
+      "highlights": [
+        "Mausoleum of Khoja Ahmed Yasawi (UNESCO)",
+        "Ruins of ancient Sauran",
+        "Arystan Bab mausoleum",
+        "Evening show at the Caravanserai complex"
+      ],
+      "itinerary": [
+        {
+          "day": 1,
+          "title": "Arrival and the old city",
+          "text": "Pickup at Turkestan airport or station. Guided visit to the Yasawi mausoleum, dinner and night at the Caravanserai."
+        },
+        {
+          "day": 2,
+          "title": "Sauran and Arystan Bab",
+          "text": "Morning drive to the walls of Sauran, picnic lunch, afternoon at Arystan Bab. Free evening on the canals."
+        },
+        {
+          "day": 3,
+          "title": "Crafts and departure",
+          "text": "Ceramics workshop with a local master, lunch, transfer to the airport or station."
+        }
+      ],
+      "included": [
+        "transport",
+        "guide",
+        "fees",
+        "stay",
+        "meals",
+        "water",
+        "insurance",
+        "pass"
+      ],
+      "notIncluded": [
+        "Flights or train to Turkestan",
+        "Evening show tickets (optional)",
+        "Souvenirs"
+      ],
+      "pickup": "Turkestan airport or railway station"
+    },
+    {
+      "id": "burabay",
+      "name": "Burabay Lakes",
+      "short": "Burabay",
+      "region": "Akmola region",
+      "start": "Astana",
+      "days": 2,
+      "priceKZT": 54000,
+      "scene": "forest",
+      "tagline": "Pine forests, granite rocks and clear lakes, three hours from Astana.",
+      "difficulty": "Easy, short forest trails",
+      "groupSize": "Small group, max 12",
+      "season": "June to September, and snowy winter trips December to February",
+      "departures": [
+        6,
+        0
+      ],
+      "seatsBase": 12,
+      "guide": "arman",
+      "highlights": [
+        "Okzhetpes rock and Zhumbaktas island",
+        "Blue Bay viewpoint",
+        "Pine forest trail to Bolektau",
+        "Lakeside dinner"
+      ],
+      "itinerary": [
+        {
+          "day": 1,
+          "title": "Astana to Burabay",
+          "text": "Pickup at 9:00, drive north, lunch by Lake Burabay, walk to the Blue Bay viewpoint and Okzhetpes rock. Night at a lakeside resort."
+        },
+        {
+          "day": 2,
+          "title": "Bolektau trail and return",
+          "text": "Morning forest hike to Bolektau, lunch, short boat ride, back in Astana by 19:00."
+        }
+      ],
+      "included": [
+        "transport",
+        "guide",
+        "fees",
+        "stay",
+        "meals",
+        "water",
+        "insurance",
+        "pass"
+      ],
+      "notIncluded": [
+        "Flights to Astana",
+        "Spa at the resort",
+        "Single room supplement"
+      ],
+      "pickup": "Your hotel in Astana, 9:00"
+    },
+    {
+      "id": "great-steppe",
+      "name": "Great Kazakhstan Week",
+      "short": "7-day route",
+      "region": "Almaty and Turkestan regions",
+      "start": "Almaty",
+      "days": 7,
+      "priceKZT": 189000,
+      "scene": "steppe",
+      "tagline": "Canyons, lakes and the Silk Road in one week, with a domestic flight included.",
+      "difficulty": "Easy to moderate",
+      "groupSize": "Small group, max 10",
+      "season": "May to June and September to October",
+      "departures": [
+        1
+      ],
+      "seatsBase": 10,
+      "guide": "aigerim",
+      "highlights": [
+        "Charyn Canyon and Kolsai lakes",
+        "Kaindy sunken forest",
+        "Flight Almaty to Turkestan",
+        "Yasawi mausoleum and Sauran"
+      ],
+      "itinerary": [
+        {
+          "day": 1,
+          "title": "Almaty welcome",
+          "text": "Airport pickup, city walk, welcome dinner."
+        },
+        {
+          "day": 2,
+          "title": "Charyn Canyon",
+          "text": "Valley of Castles walk, night in a yurt eco-camp."
+        },
+        {
+          "day": 3,
+          "title": "Kolsai lakes",
+          "text": "Drive to Saty, Lower Kolsai walk, guesthouse night."
+        },
+        {
+          "day": 4,
+          "title": "Kaindy",
+          "text": "Sunken forest and the upper trail."
+        },
+        {
+          "day": 5,
+          "title": "Fly to Turkestan",
+          "text": "Back to Almaty, evening flight to Turkestan."
+        },
+        {
+          "day": 6,
+          "title": "Silk Road day",
+          "text": "Yasawi mausoleum, Sauran, Arystan Bab."
+        },
+        {
+          "day": 7,
+          "title": "Departure",
+          "text": "Crafts workshop, transfer to the airport."
+        }
+      ],
+      "included": [
+        "transport",
+        "guide",
+        "fees",
+        "stay",
+        "meals",
+        "water",
+        "insurance",
+        "pass",
+        "flight"
+      ],
+      "notIncluded": [
+        "International flights",
+        "Horse ride at Kolsai",
+        "Single room supplement"
+      ],
+      "pickup": "Almaty airport"
+    }
+  ],
+  "inclusionLabels": {
+    "transport": "Pickup and all transport",
+    "guide": "English-speaking guide",
+    "fees": "National park entry fees",
+    "stay": "Accommodation, twin share",
+    "meals": "All meals, vegetarian options",
+    "water": "Bottled water",
+    "insurance": "Accident insurance",
+    "pass": "Trip Pass with live family sharing",
+    "flight": "Domestic flight Almaty to Turkestan"
+  },
+  "guides": {
+    "aigerim": {
+      "name": "Aigerim S.",
+      "langs": "English, Kazakh, Russian",
+      "years": 7,
+      "trips": 410,
+      "bio": "Grew up in Saty village next to Kolsai. Knows every trail and the family guesthouses by name."
+    },
+    "daulet": {
+      "name": "Daulet K.",
+      "langs": "English, Kazakh, Russian",
+      "years": 5,
+      "trips": 260,
+      "bio": "Geography teacher turned guide. Explains how the canyon formed while you walk through it."
+    },
+    "madina": {
+      "name": "Madina T.",
+      "langs": "English, Kazakh, Russian, Turkish",
+      "years": 6,
+      "trips": 300,
+      "bio": "Historian from Shymkent. Tells the stories of Yasawi and the Silk Road caravans."
+    },
+    "arman": {
+      "name": "Arman B.",
+      "langs": "English, Kazakh, Russian",
+      "years": 4,
+      "trips": 190,
+      "bio": "Certified mountain and forest guide, first aid instructor."
+    }
+  }
+}

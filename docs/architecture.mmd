@@ -1,0 +1,23 @@
+flowchart TB
+  subgraph CH["Channels"]
+    direction LR
+    W["WhatsApp Business (Cloud API)"]
+    I["Instagram Direct"]
+    WEB["Web app (React, Vercel CDN)"]
+  end
+  subgraph CORE["Booking core: Node.js on a Kazakhstan cloud"]
+    direction LR
+    AI["Tulpar AI: Claude Haiku + approved knowledge base"]
+    API["Booking API: trips, seats, quotes, bookings"]
+    DB[("PostgreSQL: personal data stored in Kazakhstan")]
+  end
+  subgraph EXT["Outputs and partners"]
+    direction LR
+    PAY["Acquiring bank: hosted payment page, 3-D Secure, PCI DSS"]
+    OUT["Trip Pass, live family view, team dashboard"]
+  end
+  CH --> API
+  AI <--> API
+  API <--> DB
+  API -- "payment link / webhook: paid" --> PAY
+  API --> OUT

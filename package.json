@@ -1,0 +1,35 @@
+{
+  "name": "saryarqa-go",
+  "version": "0.1.0",
+  "description": "Saryarqa Go — WhatsApp-first AI booking concierge for Saryarqa Routes (Zerttex Hackathon 2026, team РыбаЕж)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:single": "vite build --mode single",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource/onest": "^5.1.0",
+    "@fontsource/unbounded": "^5.1.0",
+    "lucide-react": "^0.446.0",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8",
+    "vite-plugin-singlefile": "^2.0.2",
+    "vitest": "^2.1.8"
+  },
+  "private": true,
+  "type": "module"
+}

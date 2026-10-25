@@ -1,0 +1,99 @@
+import { Link } from 'react-router-dom';
+import { OrnamentBand } from '../components/Art';
+
+// One page for the jury: how this prototype answers Case 1, with the numbers from the report.
+const problems = [
+  { said: '“It is unclear how to book.”', fix: 'Tulpar books inside the chat: question, price card, payment link, Trip Pass.', to: '/chat', cta: 'Try the chat' },
+  { said: '“I do not know what is included.”', fix: 'Clear-Price Trip Card: every inclusion, food choice and one total in rupees.', to: '/trips/kolsai-kaindy', cta: 'Open a trip' },
+  { said: '“My foreign card does not work.”', fix: 'Hosted bank payment with 3-D Secure, Apple Pay, Google Pay, deposit or split, plus a tip for Indian cards.', to: '/book/charyn-canyon?people=2&meal=veg&mode=deposit', cta: 'See checkout' },
+  { said: '“I am not sure the company is trustworthy.”', fix: 'Verified company page, guide video intros, verified reviews, refund promise, live trip link for family.', to: '/trust', cta: 'See trust page' },
+];
+
+const numbers = [
+  ['146,000', 'Indian tourists in Kazakhstan in 2024, +87% vs 2023 (Kazakh Tourism)'],
+  ['86%', 'of online adults in India message a business every week (Kantar for Meta)'],
+  ['19.9 M ₸', 'MVP and first-year launch cost, inside the 20 M ₸ budget'],
+  ['Month 22', 'payback in the base case; month 34 if results are 30% worse'],
+  ['30.8%', 'foreign share of travelers in month 24 (goal: 30%)'],
+  ['50 / 50', 'test questions answered correctly by the demo engine; 16 / 20 on unseen questions'],
+];
+
+const weeks = [
+  ['1–2', 'Interviews, wireframes, bank and Meta applications'],
+  ['3–4', 'Booking core: trips, seats, 3 currencies, admin'],
+  ['5–6', 'Payments, deposit and split links, Trip Pass'],
+  ['7–8', 'Tulpar on WhatsApp with Claude, handoff inbox'],
+  ['9–10', 'Trust layer, security and privacy review'],
+  ['11–12', 'Beta with 30 Indian students, pilot ads in India'],
+];
+
+export default function About() {
+  return (
+    <div className="about">
+      <section className="section narrow">
+        <h1>About this prototype</h1>
+        <p className="lead">
+          Saryarqa Go is team РыбаЕж’s answer to Zerttex Hackathon 2026, Case 1: help Saryarqa Routes, a small Astana tour company, reach 30% foreign travelers in 24 months. We chose young travelers from India and built the booking experience around the chat they already use.
+        </p>
+      </section>
+
+      <section className="section narrow">
+        <h2>Four complaints, four fixes</h2>
+        <div className="fixes">
+          {problems.map((p) => (
+            <div key={p.said} className="fix">
+              <p className="fix__said">{p.said}</p>
+              <p>{p.fix}</p>
+              <Link to={p.to} className="btn btn--ghost btn--sm">
+                {p.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section about-numbers">
+        <OrnamentBand className="trust-strip__band" color="#F4B400" />
+        <div className="trust-strip__inner">
+          <h2>The case in six numbers</h2>
+          <dl className="numbers">
+            {numbers.map(([n, l]) => (
+              <div key={l}>
+                <dt>{n}</dt>
+                <dd>{l}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="section narrow">
+        <h2>The 12-week MVP</h2>
+        <ol className="weeks">
+          {weeks.map(([w, t]) => (
+            <li key={w}>
+              <span>Weeks {w}</span>
+              <p>{t}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="muted">
+          This prototype already covers the MVP scope with simulated payments. The chat runs on a rule-based demo engine and switches to Claude Haiku when an API key is set on the server. Saryarqa Routes is the fictional company from the case; reviews, licence and dashboard figures here are sample data.
+        </p>
+      </section>
+
+      <section className="section narrow">
+        <h2>Team РыбаЕж</h2>
+        <p>Kaiyrbek Nurbek, Zhomart Yerkainar, Kozhakhmet Aldiyar, Alexey Abdunnur. Astana, October 2026.</p>
+        <div className="hero__cta">
+          <Link to="/chat" className="btn btn--primary">
+            Book a trip in the chat
+          </Link>
+          <Link to="/operator" className="btn btn--ghost">
+            Open the team dashboard
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
