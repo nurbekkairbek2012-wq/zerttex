@@ -4,7 +4,8 @@ import { departureFor } from '../lib/tulpar';
 import { fmtDate, tripById } from '../lib/kb';
 import { money } from '../lib/money';
 import { useStore } from '../lib/store';
-import { Shanyrak, TripArt } from './Art';
+import { Shanyrak } from './Art';
+import { Photo } from './Photo';
 import { InclusionList } from './Ticket';
 
 /** The hero: a booking happening inside one chat, played once on load. */
@@ -20,12 +21,16 @@ export function PhoneDemo() {
   const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const [step, setStep] = useState(reduce ? 6 : 0);
 
+  // Plays the booking, holds the result, then replays it in a loop.
+  const [round, setRound] = useState(0);
   useEffect(() => {
     if (reduce) return;
-    const times = [400, 1500, 2900, 4300, 5300, 6500];
+    setStep(0);
+    const times = [700, 1800, 3200, 4600, 5600, 6800];
     const timers = times.map((t, i) => setTimeout(() => setStep(i + 1), t));
+    timers.push(setTimeout(() => setRound((r) => r + 1), 12500));
     return () => timers.forEach(clearTimeout);
-  }, [reduce]);
+  }, [reduce, round]);
 
   return (
     <div className="phone" aria-label="Example: booking a trip in a chat">
@@ -64,7 +69,7 @@ export function PhoneDemo() {
               </p>
             </div>
             <div className="demo-card">
-              <TripArt scene="lake" className="demo-card__art" />
+              <Photo id="kaindy" width={500} sizes="320px" className="demo-card__art" />
               <div className="demo-card__body">
                 <strong>{trip.name}, 3 days</strong>
                 <InclusionList trip={{ ...trip, included: trip.included.slice(0, 5) }} compact />

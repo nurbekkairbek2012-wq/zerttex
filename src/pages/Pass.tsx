@@ -1,9 +1,13 @@
 import { CalendarPlus, CheckCircle2, Copy, MapPinned, MessageCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { OrnamentBand, TripArt } from '../components/Art';
+import { motion } from 'framer-motion';
+import { OrnamentBand } from '../components/Art';
+import { useToast } from '../components/Motion';
+import { Photo } from '../components/Photo';
+import { coverOf } from '../lib/photos';
 import { QR } from '../components/QR';
-import { fmtDate, guides, parseIso, tripById } from '../lib/kb';
+import { fmtDate, guides, isoDate, parseIso, tripById, upcomingDepartures } from '../lib/kb';
 import { money } from '../lib/money';
 import { mealLabel, useStore } from '../lib/store';
 
@@ -16,20 +20,16 @@ export default function Pass() {
   const { code } = useParams();
   const [sp] = useSearchParams();
   const { bookings, currency, updateBooking } = useStore();
-  const b = bookings.find((x) => x.code === code);
+  const found = bookings.find((x) => x.code === code);
+  // A shared link opened on another device still shows a sample pass instead of an error.
+  const b = found ?? {
+    code: code ?? 'SG-DEMO1', tripId: 'kolsai-kaindy', date: isoDate(upcomingDepartures(tripById('kolsai-kaindy')!, 1)[0]), people: 2, meal: 'veg' as const,
+    lead: { name: 'Sample traveler', email: '', phone: '', country: 'India' }, payMode: 'deposit' as const, totalKZT: 158000, paidKZT: 31600,
+    createdAt: new Date().toISOString(), channel: 'web' as const,
+  };
   const [copied, setCopied] = useState('');
+  const toast = useToast();
 
-  if (!b) {
-    return (
-      <section className="section narrow">
-        <h1>Trip Pass not found on this device</h1>
-        <p>Trip Passes in this prototype are saved in your browser. Open the link from the device you booked on, or make a new booking.</p>
-        <Link to="/" className="btn btn--primary">
-          See trips
-        </Link>
-      </section>
-    );
-  }
   const trip = tripById(b.tripId)!;
   const g = guides[trip.guide];
   const dep = parseIso(b.date);
@@ -40,6 +40,7 @@ export default function Pass() {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(what);
+      toast(what === 'live' ? 'Live link copied. Send it to your family.' : 'Payment link copied.');
       setTimeout(() => setCopied(''), 2000);
     } catch {
       setCopied('');
@@ -62,6 +63,7 @@ export default function Pass() {
     a.download = `${b.code}.ics`;
     a.click();
     URL.revokeObjectURL(url);
+    toast('Calendar file downloaded.');
   };
 
   const waText = encodeURIComponent(`We're going to ${trip.name} on ${fmtDate(dep, { day: 'numeric', month: 'long' })}! Follow our trip live: ${liveLink}`);
@@ -69,20 +71,26 @@ export default function Pass() {
   return (
     <section className="pass-page">
       {sp.get('new') && (
-        <div className="success" role="status">
+        <motion.div className="success" role="status" initial={{ opacity: 0, y: -20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.5, type: 'spring' }}>
           <CheckCircle2 aria-hidden="true" />
           <div>
             <strong>Payment confirmed. Your seats are booked.</strong>
             <p>We sent this Trip Pass to {b.lead.email || 'your email'} and WhatsApp. Your guide will message you the day before.</p>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      <article className="pass">
+      <motion.article
+        className="pass"
+        initial={{ opacity: 0, rotateX: -35, y: 80, scale: 0.9 }}
+        animate={{ opacity: 1, rotateX: 0, y: 0, scale: 1 }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        style={{ transformPerspective: 1200 }}
+      >
         <div className="pass__top">
-          <TripArt scene={trip.scene} className="pass__art" />
+          <Photo id={coverOf(trip.id)} width={1280} sizes="880px" className="pass__art" eager />
           <div className="pass__title">
-            <span>Trip Pass</span>
+            <span>{found ? 'Trip Pass' : 'Sample Trip Pass (booking made on another device)'}</span>
             <h1>{trip.name}</h1>
             <p>{fmtDate(dep, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
           </div>
@@ -153,6 +161,7 @@ export default function Pass() {
                         type="button"
                         className="btn btn--link btn--sm"
                         onClick={() =>
+                          found &&
                           updateBooking(b.code, {
                             split: b.split!.map((x, j) => (j === i ? { ...x, paid: true } : x)),
                             paidKZT: b.paidKZT + s.amountKZT,
@@ -186,7 +195,7 @@ export default function Pass() {
             <MessageCircle size={18} aria-hidden="true" /> Questions? Ask Tulpar
           </Link>
         </div>
-      </article>
+      </motion.article>
     </section>
   );
 }

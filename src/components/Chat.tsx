@@ -6,7 +6,10 @@ import { tripById } from '../lib/kb';
 import { money } from '../lib/money';
 import { useStore } from '../lib/store';
 import type { ChatMsg } from '../lib/tulpar';
-import { Shanyrak, TripArt } from './Art';
+import { coverOf } from '../lib/photos';
+import { Shanyrak } from './Art';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Photo } from './Photo';
 import { TripTicket } from './Ticket';
 
 const navChips: Record<string, string> = {
@@ -17,7 +20,12 @@ const navChips: Record<string, string> = {
 function Bubble({ m, onChip, live }: { m: ChatMsg; onChip: (c: string) => void; live: boolean }) {
   const { currency } = useStore();
   return (
-    <div className={`msg msg--${m.from}`}>
+    <motion.div
+      className={`msg msg--${m.from}`}
+      initial={{ opacity: 0, y: 18, scale: 0.94, x: m.from === 'user' ? 30 : -30 }}
+      animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+    >
       <div className="msg__bubble">
         {m.text.split('\n').map((line, i) => (
           <p key={i}>{line || ' '}</p>
@@ -34,7 +42,7 @@ function Bubble({ m, onChip, live }: { m: ChatMsg; onChip: (c: string) => void; 
             const t = tripById(id)!;
             return (
               <Link key={id} to={`/trips/${id}`} className="mini-trip">
-                <TripArt scene={t.scene} className="mini-trip__art" />
+                <Photo id={coverOf(t.id)} width={500} sizes="150px" className="mini-trip__art" />
                 <span className="mini-trip__name">{t.name}</span>
                 <span className="mini-trip__meta">
                   {t.days} days, {money(t.priceKZT, currency)}
@@ -45,9 +53,9 @@ function Bubble({ m, onChip, live }: { m: ChatMsg; onChip: (c: string) => void; 
         </div>
       )}
       {m.quote && (
-        <div className="msg__quote">
+        <motion.div className="msg__quote" initial={{ clipPath: 'inset(0 0 100% 0)' }} animate={{ clipPath: 'inset(0 0 0% 0)' }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}>
           <TripTicket tripId={m.quote.tripId} date={m.quote.date} people={m.quote.people} meal={m.quote.meal} variant="chat" source="chat" />
-        </div>
+        </motion.div>
       )}
       {live && m.chips && m.chips.length > 0 && (
         <div className="chips" role="group" aria-label="Suggested replies">
@@ -58,7 +66,7 @@ function Bubble({ m, onChip, live }: { m: ChatMsg; onChip: (c: string) => void; 
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -158,17 +166,37 @@ export function ChatWidget() {
   if (pathname.startsWith('/chat') || pathname.startsWith('/operator')) return null;
   return (
     <>
-      {chatOpen && (
-        <div className="chat-pop" role="dialog" aria-label="Chat with Tulpar">
-          <ChatHeader onClose={() => setChatOpen(false)} />
-          <ChatThread autoFocus />
-        </div>
-      )}
+      <AnimatePresence>
+        {chatOpen && (
+          <motion.div
+            className="chat-pop"
+            role="dialog"
+            aria-label="Chat with Tulpar"
+            initial={{ opacity: 0, y: 60, scale: 0.85, originX: 1, originY: 1 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+          >
+            <ChatHeader onClose={() => setChatOpen(false)} />
+            <ChatThread autoFocus />
+          </motion.div>
+        )}
+      </AnimatePresence>
       {!chatOpen && (
-        <button type="button" className="chat-fab" onClick={() => setChatOpen(true)}>
+        <motion.button
+          type="button"
+          className="chat-fab"
+          onClick={() => setChatOpen(true)}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.94 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+        >
+          <span className="chat-fab__ring" aria-hidden="true" />
           <MessageCircle size={20} aria-hidden="true" />
           <span>Ask Tulpar</span>
-        </button>
+        </motion.button>
       )}
     </>
   );

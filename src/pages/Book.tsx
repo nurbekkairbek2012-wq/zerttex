@@ -4,7 +4,9 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TripTicket } from '../components/Ticket';
 import { fmtDate, isoDate, parseIso, tripById, upcomingDepartures } from '../lib/kb';
 import { money } from '../lib/money';
+import { celebrate } from '../lib/celebrate';
 import { makeCode, useStore, type Booking, type Meal, type PayMode } from '../lib/store';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Step = 'details' | 'pay' | 'otp' | 'processing';
 
@@ -81,8 +83,9 @@ export default function Book() {
     };
     setTimeout(() => {
       addBooking(booking);
+      celebrate();
       navigate(`/pass/${code}?new=1`);
-    }, 1400);
+    }, 1600);
   };
 
   return (
@@ -98,8 +101,9 @@ export default function Book() {
           <li className={step === 'otp' || step === 'processing' ? 'is-on' : ''}>Confirm</li>
         </ol>
 
+        <AnimatePresence mode="wait">
         {step === 'details' && (
-          <form className="form" onSubmit={submitDetails} noValidate>
+          <motion.form key="details" className="form" onSubmit={submitDetails} noValidate initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
             <h2>Lead traveler</h2>
             <div className="form__grid">
               <label>
@@ -142,11 +146,11 @@ export default function Book() {
             <button type="submit" className="btn btn--primary btn--lg">
               Continue to payment
             </button>
-          </form>
+          </motion.form>
         )}
 
         {step === 'pay' && (
-          <form className="form" onSubmit={pay}>
+          <motion.form key="pay" className="form" onSubmit={pay} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
             <h2>How do you want to pay?</h2>
             <div className="paymodes" role="radiogroup" aria-label="Payment plan">
               <button type="button" role="radio" aria-checked={mode === 'deposit'} className={`paymode ${mode === 'deposit' ? 'is-on' : ''}`} onClick={() => setMode('deposit')}>
@@ -233,11 +237,11 @@ export default function Book() {
             <button type="button" className="btn btn--link" onClick={() => setStep('details')}>
               Back to traveler details
             </button>
-          </form>
+          </motion.form>
         )}
 
         {(step === 'otp' || step === 'processing') && (
-          <form className="form bank" onSubmit={confirmOtp}>
+          <motion.form key="otp" className="form bank" onSubmit={confirmOtp} initial={{ opacity: 0, scale: 0.92, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0 }}>
             <div className="bank__head">
               <Lock size={18} aria-hidden="true" /> Your bank: 3-D Secure check
             </div>
@@ -264,8 +268,9 @@ export default function Book() {
                 <span className="spinner" aria-hidden="true" /> Confirming with your bank and issuing your Trip Pass…
               </div>
             )}
-          </form>
+          </motion.form>
         )}
+        </AnimatePresence>
       </div>
 
       <aside className="checkout__side">

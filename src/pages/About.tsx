@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
 import { OrnamentBand } from '../components/Art';
+import { CountUp, Reveal, SplitText } from '../components/Motion';
+import { Photo } from '../components/Photo';
+import { commonsPage, photos, type PhotoId } from '../lib/photos';
+import { motion } from 'framer-motion';
 
 // One page for the jury: how this prototype answers Case 1, with the numbers from the report.
 const problems = [
@@ -9,13 +13,13 @@ const problems = [
   { said: '“I am not sure the company is trustworthy.”', fix: 'Verified company page, guide video intros, verified reviews, refund promise, live trip link for family.', to: '/trust', cta: 'See trust page' },
 ];
 
-const numbers = [
-  ['146,000', 'Indian tourists in Kazakhstan in 2024, +87% vs 2023 (Kazakh Tourism)'],
-  ['86%', 'of online adults in India message a business every week (Kantar for Meta)'],
-  ['19.9 M ₸', 'MVP and first-year launch cost, inside the 20 M ₸ budget'],
-  ['Month 22', 'payback in the base case; month 34 if results are 30% worse'],
-  ['30.8%', 'foreign share of travelers in month 24 (goal: 30%)'],
-  ['50 / 50', 'test questions answered correctly by the demo engine; 16 / 20 on unseen questions'],
+const numbers: [number, string, string, string, number?][] = [
+  [146000, '', '', 'Indian tourists in Kazakhstan in 2024, +87% vs 2023 (Kazakh Tourism)'],
+  [86, '', '%', 'of online adults in India message a business every week (Kantar for Meta)'],
+  [19.9, '', ' M ₸', 'MVP and first-year launch cost, inside the 20 M ₸ budget', 1],
+  [22, 'Month ', '', 'payback in the base case; month 34 if results are 30% worse'],
+  [30.8, '', '%', 'foreign share of travelers in month 24 (goal: 30%)', 1],
+  [50, '', ' / 50', 'test questions answered correctly by the demo engine; 16 / 20 on unseen questions'],
 ];
 
 const weeks = [
@@ -31,7 +35,7 @@ export default function About() {
   return (
     <div className="about">
       <section className="section narrow">
-        <h1>About this prototype</h1>
+        <SplitText text="About this prototype" />
         <p className="lead">
           Saryarqa Go is team РыбаЕж’s answer to Zerttex Hackathon 2026, Case 1: help Saryarqa Routes, a small Astana tour company, reach 30% foreign travelers in 24 months. We chose young travelers from India and built the booking experience around the chat they already use.
         </p>
@@ -41,13 +45,13 @@ export default function About() {
         <h2>Four complaints, four fixes</h2>
         <div className="fixes">
           {problems.map((p) => (
-            <div key={p.said} className="fix">
+            <motion.div key={p.said} className="fix" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={{ y: -6 }}>
               <p className="fix__said">{p.said}</p>
               <p>{p.fix}</p>
               <Link to={p.to} className="btn btn--ghost btn--sm">
                 {p.cta}
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -57,9 +61,11 @@ export default function About() {
         <div className="trust-strip__inner">
           <h2>The case in six numbers</h2>
           <dl className="numbers">
-            {numbers.map(([n, l]) => (
+            {numbers.map(([n, pre, suf, l, dec]) => (
               <div key={l}>
-                <dt>{n}</dt>
+                <dt>
+                  <CountUp to={n} prefix={pre} suffix={suf} decimals={dec ?? 0} />
+                </dt>
                 <dd>{l}</dd>
               </div>
             ))}
@@ -93,6 +99,25 @@ export default function About() {
             Open the team dashboard
           </Link>
         </div>
+      </section>
+      <section className="section narrow" id="credits">
+        <Reveal>
+          <h2>Photo credits</h2>
+          <p className="muted">All photos are real and come from Wikimedia Commons under free licences. Thank you to the photographers.</p>
+          <ul className="credits">
+            {(Object.keys(photos) as PhotoId[]).map((id) => (
+              <li key={id}>
+                <Photo id={id} width={500} sizes="72px" />
+                <span>
+                  <b>{photos[id].place}</b>: {photos[id].alt}. {photos[id].author}, {photos[id].license}.{' '}
+                  <a href={commonsPage(id)} target="_blank" rel="noreferrer">
+                    Source
+                  </a>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
       </section>
     </div>
   );

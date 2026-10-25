@@ -6,7 +6,9 @@ import { Link } from 'react-router-dom';
 import { fmtDate, guides, inclusionLabels, parseIso, tripById, type Trip } from '../lib/kb';
 import { money } from '../lib/money';
 import { mealLabel, useStore, type Meal } from '../lib/store';
-import { OrnamentBand, TripArt } from './Art';
+import { coverOf } from '../lib/photos';
+import { OrnamentBand } from './Art';
+import { Photo } from './Photo';
 
 export const inclusionIcon: Record<string, LucideIcon> = {
   transport: Bus,
@@ -80,7 +82,7 @@ export function TripTicket({
   return (
     <article className={`ticket ticket--${variant}`} aria-label={`Clear-price card for ${trip.name}`}>
       <div className="ticket__stub">
-        <TripArt scene={trip.scene} className="ticket__art" title={trip.name} />
+        <Photo id={coverOf(trip.id)} width={960} sizes="420px" className="ticket__art" />
         <div className="ticket__title">
           <h3>{trip.name}</h3>
           <p>

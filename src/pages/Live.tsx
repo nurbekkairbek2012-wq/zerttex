@@ -1,5 +1,8 @@
-import { BatteryMedium, Phone, Radio } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { BatteryMedium, Pause, Phone, Play, Radio } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Photo } from '../components/Photo';
+import { tripPhotos } from '../lib/photos';
 import { Link, useParams } from 'react-router-dom';
 import { fmtDate, guides, parseIso, tripById, trips } from '../lib/kb';
 import { useStore } from '../lib/store';
@@ -11,7 +14,15 @@ export default function Live() {
   const b = bookings.find((x) => x.code === code);
   const trip = tripById(b?.tripId) ?? trips[0];
   const g = guides[trip.guide];
-  const [progress, setProgress] = useState(55);
+  const [progress, setProgress] = useState(5);
+  const [playing, setPlaying] = useState(true);
+  // Auto-plays the trip: the group's dot travels the route like real GPS check-ins.
+  useEffect(() => {
+    if (!playing) return;
+    const id = setInterval(() => setProgress((p) => (p >= 100 ? 0 : p + 0.5)), 80);
+    return () => clearInterval(id);
+  }, [playing]);
+  const gallery = tripPhotos[trip.id] ?? ['kolsai'];
 
   const stops = useMemo(() => {
     const s = [{ t: '07:00', label: `Picked up: ${trip.pickup}` }];
@@ -57,20 +68,32 @@ export default function Live() {
             ].map(([x, y], i) => (
               <circle key={i} cx={x} cy={y} r="7" fill="#fff" stroke="#15233F" strokeWidth="3" />
             ))}
-            <circle cx={pos.x} cy={pos.y} r="16" fill="#0B7C86" opacity=".18" />
+            <path d={pathD} fill="none" stroke="#0B7C86" strokeWidth="4" strokeLinecap="round" pathLength={100} strokeDasharray={`${progress} 100`} />
+            <circle cx={pos.x} cy={pos.y} r="16" fill="#0B7C86" opacity=".18">
+              <animate attributeName="r" values="10;26;10" dur="1.6s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values=".35;0;.35" dur="1.6s" repeatCount="indefinite" />
+            </circle>
             <circle cx={pos.x} cy={pos.y} r="9" fill="#0B7C86" stroke="#fff" strokeWidth="3" />
           </svg>
+          <div className="live__controls">
+            <button type="button" className="btn btn--primary btn--sm" onClick={() => setPlaying(!playing)}>
+              {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />} {playing ? 'Pause' : 'Play trip'}
+            </button>
+          </div>
           <label className="live__sim">
             Simulate trip time
-            <input type="range" min={0} max={100} value={progress} onChange={(e) => setProgress(Number(e.target.value))} />
+            <input type="range" min={0} max={100} value={progress} onChange={(e) => (setPlaying(false), setProgress(Number(e.target.value)))} />
           </label>
         </div>
         <div className="live__side">
-          <div className="live__now">
+          <motion.div className="live__now" key={current} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="live__photo">
+              <Photo id={gallery[current % gallery.length]} width={960} sizes="420px" />
+            </div>
             <span className="muted">Now</span>
             <strong>{stops[current].label}</strong>
             <span className="muted">Last check-in by {g.name}, a few minutes ago</span>
-          </div>
+          </motion.div>
           <ol className="live__timeline">
             {stops.map((s, i) => (
               <li key={i} className={i < current ? 'is-done' : i === current ? 'is-now' : ''}>

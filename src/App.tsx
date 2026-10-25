@@ -1,5 +1,7 @@
+import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { lazy, Suspense } from 'react';
-import { HashRouter, Link, Route, Routes } from 'react-router-dom';
+import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
+import { PageTransition, ToastProvider } from './components/Motion';
 import { Layout } from './components/Layout';
 import { ChatProvider } from './lib/chat';
 import { StoreProvider } from './lib/store';
@@ -27,30 +29,45 @@ function NotFound() {
   );
 }
 
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <PageTransition key={location.pathname}>
+        <Suspense fallback={<div className="section narrow" aria-busy="true" />}>
+          <Routes location={location}>
+            <Route path="/" element={<Home />} />
+            <Route path="/trips/:id" element={<TripPage />} />
+            <Route path="/book/:id" element={<Book />} />
+            <Route path="/pass/:code" element={<Pass />} />
+            <Route path="/live/:code" element={<Live />} />
+            <Route path="/trust" element={<Trust />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/operator" element={<Operator />} />
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </PageTransition>
+    </AnimatePresence>
+  );
+}
+
 // HashRouter keeps every deep link working on any static host (Vercel, Netlify, GitHub Pages, a file).
 export default function App() {
   return (
     <HashRouter>
-      <StoreProvider>
-        <ChatProvider>
-          <Layout>
-            <Suspense fallback={<div className="section narrow" aria-busy="true" />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/trips/:id" element={<TripPage />} />
-              <Route path="/book/:id" element={<Book />} />
-              <Route path="/pass/:code" element={<Pass />} />
-              <Route path="/live/:code" element={<Live />} />
-              <Route path="/trust" element={<Trust />} />
-              <Route path="/chat" element={<ChatPage />} />
-              <Route path="/operator" element={<Operator />} />
-              <Route path="/about" element={<About />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            </Suspense>
-          </Layout>
-        </ChatProvider>
-      </StoreProvider>
+      <MotionConfig reducedMotion="user">
+      <ToastProvider>
+        <StoreProvider>
+          <ChatProvider>
+            <Layout>
+              <AnimatedRoutes />
+            </Layout>
+          </ChatProvider>
+        </StoreProvider>
+      </ToastProvider>
+      </MotionConfig>
     </HashRouter>
   );
 }

@@ -6,6 +6,7 @@ import type { Currency } from '../lib/money';
 import { useStore } from '../lib/store';
 import { Shanyrak } from './Art';
 import { ChatWidget } from './Chat';
+import { ScrollProgress } from './Motion';
 
 function CurrencySwitch() {
   const { currency, setCurrency } = useStore();
@@ -26,14 +27,22 @@ export function Layout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const { setChatOpen } = useStore();
+  const { hash } = useLocation();
   useEffect(() => {
     setOpen(false);
-    if (!location.hash.includes('#guides')) window.scrollTo(0, 0);
-  }, [pathname]);
+    if (!hash) {
+      window.scrollTo({ top: 0 });
+      return;
+    }
+    // Wait for the page transition, then scroll to the section named in the link.
+    const t = setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 650);
+    return () => clearTimeout(t);
+  }, [pathname, hash]);
   const isOperator = pathname.startsWith('/operator');
 
   return (
     <div className="app">
+      <ScrollProgress />
       <div className="demo-bar">
         Hackathon prototype by team РыбаЕж. {company.name} is the fictional company from the Zerttex 2026 case; payments and data here are simulated.
       </div>
@@ -90,10 +99,11 @@ export function Layout({ children }: { children: ReactNode }) {
               <Link to="/trust#privacy">Your data</Link>
               <Link to="/chat">Ask Tulpar</Link>
               <Link to="/about">About the project</Link>
+              <Link to="/about#credits">Photo credits</Link>
             </div>
           </div>
           <p className="foot__fine">
-            Prototype for Zerttex Hackathon 2026, Case 1. Prices are shown at National Bank of Kazakhstan rates of 25 Oct 2026. Sample reviews and bookings are illustrative.
+            Prototype for Zerttex Hackathon 2026, Case 1. Prices are shown at National Bank of Kazakhstan rates of 25 Oct 2026. Sample reviews and bookings are illustrative. Photos: Wikimedia Commons contributors (see Photo credits).
           </p>
         </footer>
       )}

@@ -1,7 +1,10 @@
 import { BadgeCheck, CreditCard, Database, RefreshCcw, Star } from 'lucide-react';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { TripArt } from '../components/Art';
+import { motion } from 'framer-motion';
+import { Reveal } from '../components/Motion';
+import { Photo } from '../components/Photo';
+import { coverOf } from '../lib/photos';
 import { company, guides, policies, trips } from '../lib/kb';
 
 export default function Trust() {
@@ -19,7 +22,7 @@ export default function Trust() {
         </p>
       </section>
 
-      <section className="section narrow trust-sec" id="company">
+      <Reveal className="section narrow trust-sec" id="company">
         <BadgeCheck className="trust-sec__icon" aria-hidden="true" />
         <div>
           <h2>The company</h2>
@@ -48,9 +51,9 @@ export default function Trust() {
             </div>
           </dl>
         </div>
-      </section>
+      </Reveal>
 
-      <section className="section narrow trust-sec" id="promise">
+      <Reveal className="section narrow trust-sec" id="promise">
         <RefreshCcw className="trust-sec__icon" aria-hidden="true" />
         <div>
           <h2>Saryarqa Promise</h2>
@@ -61,9 +64,9 @@ export default function Trust() {
             <li>{policies.deposit}</li>
           </ul>
         </div>
-      </section>
+      </Reveal>
 
-      <section className="section narrow trust-sec" id="payments">
+      <Reveal className="section narrow trust-sec" id="payments">
         <CreditCard className="trust-sec__icon" aria-hidden="true" />
         <div>
           <h2>Paying from India</h2>
@@ -75,9 +78,9 @@ export default function Trust() {
             <li>{policies.indianCards}</li>
           </ul>
         </div>
-      </section>
+      </Reveal>
 
-      <section className="section narrow trust-sec" id="privacy">
+      <Reveal className="section narrow trust-sec" id="privacy">
         <Database className="trust-sec__icon" aria-hidden="true" />
         <div>
           <h2>Your data</h2>
@@ -89,15 +92,15 @@ export default function Trust() {
             <li>Chats with Tulpar are used to answer you and to improve answers; they are never sold or used for ads.</li>
           </ul>
         </div>
-      </section>
+      </Reveal>
 
-      <section className="section narrow trust-sec" id="reviews">
+      <Reveal className="section narrow trust-sec" id="reviews">
         <Star className="trust-sec__icon" aria-hidden="true" />
         <div>
           <h2>Reviews you can believe</h2>
           <p>Only travelers with a completed Trip Pass can leave a review, one per booking. We publish every review, including bad ones, and reply to each. Reviews are also mirrored to Google Maps and Tripadvisor so you can compare.</p>
         </div>
-      </section>
+      </Reveal>
 
       <section className="section" id="guides">
         <div className="section__head">
@@ -108,8 +111,8 @@ export default function Trust() {
           {Object.entries(guides).map(([gid, g]) => {
             const t = trips.find((x) => x.guide === gid)!;
             return (
-              <article key={gid} className="guide-card">
-                <TripArt scene={t.scene} className="guide-card__art" />
+              <motion.article key={gid} className="guide-card" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={{ y: -6 }}>
+                <Photo id={coverOf(t.id)} width={500} sizes="140px" className="guide-card__art" />
                 <div>
                   <h3>{g.name}</h3>
                   <p className="muted">
@@ -118,7 +121,7 @@ export default function Trust() {
                   <p>{g.bio}</p>
                   <span className="verified">Verified guide</span>
                 </div>
-              </article>
+              </motion.article>
             );
           })}
         </div>

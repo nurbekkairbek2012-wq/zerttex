@@ -16,6 +16,8 @@ Zerttex Hackathon 2026, Stage 1, Case 1: Technology Product. Team **РыбаЕж
 ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
+### [▶ Open the live prototype](https://subtle-raindrop-8140a8.netlify.app)
+
 [Try the demo](#try-it-in-3-minutes) · [How it works](#how-tulpar-works) · [Business case](#business-case) · [Run locally](#run-locally) · [Deploy](#deploy)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/nurbekkairbek2012-wq/zerttex)
@@ -82,6 +84,13 @@ Goal: **30% of travelers from abroad within 24 months**, with a first-year budge
 China is larger (960,000+ visitors in 2025), but it needs a separate app and payment ecosystem. It is our **second market** (Alipay+ already works in Kazakhstan through Kaspi QR since August 2025).
 
 ---
+
+## Real photos and motion
+
+- **Every photo is real.** Kolsai, Kaindy, Charyn, the Yasawi mausoleum, Sauran, Burabay, Big Almaty Lake and Shymbulak come from Wikimedia Commons under free licences, served as responsive `srcset` thumbnails and credited on the page (About → Photo credits) and in `src/lib/photos.ts`.
+- **Motion with a purpose** (Framer Motion): parallax photo hero with a word-by-word headline, a floating 3D phone that replays a real booking, an endless photo strip, 3D tilt cards with a light reflection, animated trip filters, a progress line that draws as you scroll through the steps, count-up numbers, a full-screen photo viewer with keyboard arrows, a Ken Burns guide intro, confetti and a 3D Trip Pass flip after payment, auto-playing live trip tracking and animated dashboard charts.
+- **Every button works:** share (system share sheet or copy link), Ask Tulpar from any trip, reply to handoffs in the operator inbox, split-payment links, calendar file, WhatsApp share and a sample Trip Pass when a link is opened on another device.
+- Motion respects the system *reduce motion* setting.
 
 ## Four complaints, four features
 

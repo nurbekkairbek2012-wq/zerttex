@@ -1,5 +1,7 @@
-import { AlertCircle, Bot, CreditCard, Globe2, MessageSquare, Users } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, Bot, CheckCircle2, CreditCard, Globe2, MessageSquare, Send, Users, X } from 'lucide-react';
 import { useState } from 'react';
+import { CountUp, useToast } from '../components/Motion';
 import { Link } from 'react-router-dom';
 import { fmtDate, guides, parseIso, seatsLeft, tripById, trips, upcomingDepartures } from '../lib/kb';
 import { money } from '../lib/money';
@@ -41,7 +43,14 @@ function BarChart() {
           const h = (v / max) * 120;
           const x = 34 + i * 27;
           return (
-            <g key={i} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} tabIndex={0}>
+            <motion.g
+              key={i}
+              initial={{ scaleY: 0, opacity: 0 }}
+              whileInView={{ scaleY: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.06, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              style={{ transformOrigin: 'bottom', transformBox: 'fill-box' }}
+              onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} tabIndex={0}>
               <rect x={x - 3} y="10" width="27" height="135" fill="transparent" />
               <path d={`M${x} 140 V${140 - h + 4} q0 -4 4 -4 h13 q4 0 4 4 V140 Z`} fill={hover === null || hover === i ? 'var(--lake)' : 'var(--lake-soft)'} />
               <text x={x + 10.5} y="155" className="axis" textAnchor="middle">{i + 1}</text>
@@ -53,7 +62,7 @@ function BarChart() {
                   </text>
                 </g>
               )}
-            </g>
+            </motion.g>
           );
         })}
       </svg>
@@ -63,6 +72,22 @@ function BarChart() {
 
 export default function Operator() {
   const { bookings, currency } = useStore();
+  const toast = useToast();
+  const [queue, setQueue] = useState(handoffs);
+  const [replying, setReplying] = useState<(typeof handoffs)[number] | null>(null);
+  const [reply, setReply] = useState('');
+  const templates = [
+    'Yes! Charyn has an accessible viewpoint and our van has a ramp. I will reserve the front seats for you.',
+    'For groups of 10 or more we give 10% off. Shall I prepare a quote for 14 students?',
+    'Yes, the Caravanserai hotel has a prayer room, and Turkestan has several mosques next to the route.',
+  ];
+  const send = () => {
+    if (!replying || !reply.trim()) return;
+    setQueue((q) => q.filter((h) => h.who !== replying.who));
+    toast('Reply sent on WhatsApp. Tulpar has the conversation history.');
+    setReplying(null);
+    setReply('');
+  };
   const foreignNow = 18;
   const goal = 30;
   const departures = trips.slice(0, 4).map((t) => {
@@ -96,7 +121,7 @@ export default function Operator() {
           </div>
         </div>
         <div className="meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={foreignNow} aria-label="Share of foreign travelers">
-          <div className="meter__fill" style={{ width: `${foreignNow}%` }} />
+          <motion.div className="meter__fill" initial={{ width: 0 }} animate={{ width: `${foreignNow}%` }} transition={{ duration: 1.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }} />
           <div className="meter__goal" style={{ left: `${goal}%` }}>
             <span>Goal {goal}%</span>
           </div>
@@ -108,25 +133,25 @@ export default function Operator() {
         <div className="tile">
           <MessageSquare aria-hidden="true" />
           <span>Chat to paid booking</span>
-          <strong>12.4%</strong>
+          <strong><CountUp to={12.4} decimals={1} suffix="%" /></strong>
           <small>51 of 412 conversations</small>
         </div>
         <div className="tile">
           <Bot aria-hidden="true" />
           <span>Answered by Tulpar alone</span>
-          <strong>78%</strong>
+          <strong><CountUp to={78} suffix="%" /></strong>
           <small>22% handed to the team</small>
         </div>
         <div className="tile">
           <CreditCard aria-hidden="true" />
           <span>Foreign card success</span>
-          <strong>91%</strong>
+          <strong><CountUp to={91} suffix="%" /></strong>
           <small>Target 90% or higher</small>
         </div>
         <div className="tile">
           <Users aria-hidden="true" />
           <span>Foreign travelers, 12 weeks</span>
-          <strong>{weekly.reduce((a, b) => a + b, 0)}</strong>
+          <strong><CountUp to={weekly.reduce((a, b) => a + b, 0)} /></strong>
           <small>{money(weekly.reduce((a, b) => a + b, 0) * 66000, currency)} revenue</small>
         </div>
       </div>
@@ -141,7 +166,7 @@ export default function Operator() {
             <ul className="funnel">
               {funnel.map((f) => (
                 <li key={f.label}>
-                  <div className="funnel__bar" style={{ width: `${(f.v / funnel[0].v) * 100}%` }} title={`${f.label}: ${f.v}`} />
+                  <motion.div className="funnel__bar" initial={{ width: 0 }} whileInView={{ width: `${(f.v / funnel[0].v) * 100}%` }} viewport={{ once: true }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} title={`${f.label}: ${f.v}`} />
                   <span className="funnel__label">{f.label}</span>
                   <b>{f.v}</b>
                 </li>
@@ -155,8 +180,14 @@ export default function Operator() {
         <div className="panel">
           <h2>Waiting for a person</h2>
           <ul className="handoffs">
-            {handoffs.map((h) => (
-              <li key={h.who}>
+            <AnimatePresence>
+            {queue.length === 0 && (
+              <motion.li key="empty" className="handoffs__empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <CheckCircle2 size={18} aria-hidden="true" /> Inbox zero. Every traveler has an answer.
+              </motion.li>
+            )}
+            {queue.map((h, i) => (
+              <motion.li key={h.who} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 80, height: 0 }} transition={{ delay: i * 0.05 }}>
                 <AlertCircle size={18} aria-hidden="true" />
                 <div>
                   <strong>{h.q}</strong>
@@ -164,11 +195,12 @@ export default function Operator() {
                     {h.who}, waiting {h.wait}
                   </span>
                 </div>
-                <button type="button" className="btn btn--ghost btn--sm">
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => (setReplying(h), setReply(templates[handoffs.indexOf(h)] ?? ''))}>
                   Reply
                 </button>
-              </li>
+              </motion.li>
             ))}
+            </AnimatePresence>
           </ul>
         </div>
         <div className="panel">
@@ -234,6 +266,31 @@ export default function Operator() {
         </div>
         {bookings.length > 0 && <p className="muted">Highlighted rows are bookings you made in this browser ({fmtDate(parseIso(bookings[0].date))} is the next one).</p>}
       </div>
+      <AnimatePresence>
+        {replying && (
+          <motion.div className="modal" role="dialog" aria-modal="true" aria-label="Reply to traveler" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setReplying(null)}>
+            <motion.div className="modal__box" initial={{ y: 40, scale: 0.92 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
+              <button type="button" className="icon-btn modal__close" onClick={() => setReplying(null)} aria-label="Close">
+                <X />
+              </button>
+              <h3>Reply on WhatsApp</h3>
+              <p className="muted">{replying.who}</p>
+              <div className="msg msg--user">
+                <div className="msg__bubble">
+                  <p>{replying.q}</p>
+                </div>
+              </div>
+              <label className="reply-box">
+                Your answer (Tulpar suggested a draft)
+                <textarea value={reply} onChange={(e) => setReply(e.target.value)} rows={4} />
+              </label>
+              <button type="button" className="btn btn--primary" onClick={send} disabled={!reply.trim()}>
+                <Send size={16} aria-hidden="true" /> Send reply
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
