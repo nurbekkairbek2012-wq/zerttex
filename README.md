@@ -16,7 +16,7 @@ Zerttex Hackathon 2026, Stage 1, Case 1: Technology Product. Team **РыбаЕж
 ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-### [▶ Open the live prototype](https://subtle-raindrop-8140a8.netlify.app)
+### [▶ Open the live prototype](https://zerttex.netlify.app)
 
 [Try the demo](#try-it-in-3-minutes) · [How it works](#how-tulpar-works) · [Business case](#business-case) · [Run locally](#run-locally) · [Deploy](#deploy)
 
@@ -26,6 +26,54 @@ Zerttex Hackathon 2026, Stage 1, Case 1: Technology Product. Team **РыбаЕж
 ![Saryarqa Go home page](docs/screenshots/home.png)
 
 </div>
+
+---
+
+## 🛠 Задачи для команды (до финала 29 октября)
+
+> Срок: залить в `main` до **28 октября, 23:59** — потом сайт менять нельзя. После пуша Netlify сам пересоберёт https://zerttex.netlify.app. Перед пушем: `npm test` и `npm run build` должны пройти без ошибок.
+
+### 1. Тулпара можно перетаскивать по экрану
+
+Сейчас кнопка «Ask Tulpar» и окно чата всегда в правом нижнем углу (`src/components/Chat.tsx`, компонент `ChatWidget`; стили `.chat-fab` и `.chat-pop` в `src/styles.css`).
+
+- Кнопку и окно можно схватить мышкой или пальцем и перенести.
+- При отпускании они «прилипают» к ближайшему удобному месту: 4 угла, середина левого и правого края, центр снизу. Сверху не залезают под шапку сайта.
+- Во время перетаскивания видно, куда прилипнет (подсветка мест).
+- Окно чата тянется за шапку окна; кнопки в шапке (сброс, закрыть) работают как раньше.
+- Клик по кнопке без перетаскивания открывает чат, как раньше.
+- Место запоминается (`localStorage`, ключ `sg.chatSpot`) и сохраняется после перезагрузки.
+- На телефоне (ширина ≤ 520px) окно чата остаётся на весь экран, перетаскивается только кнопка.
+- Подсказка: во framer-motion есть `drag`, `useDragControls`, `useMotionValue`, `animate`.
+
+### 2. Сайт на 4 языках: English, हिन्दी, Русский, Қазақша
+
+- В шапке рядом с выбором валюты — переключатель языка `EN · हि · РУ · ҚАЗ`. Выбор запоминается (`localStorage`, ключ `sg.lang`), `<html lang>` меняется.
+- Переводится весь интерфейс: шапка, подвал, все страницы (`src/pages/*`), чат, карточки цены, тексты туров и правил из `shared/knowledge.json`, приветствие и кнопки-подсказки Тулпара.
+- Даты и «3 days / 2 people» тоже на выбранном языке.
+- Шрифты: для хинди подключить `@fontsource/noto-sans-devanagari`, для казахских букв (ә, ғ, қ, ң, ө, ұ, ү, һ, і) — подмножества `cyrillic-ext` у Onest и Unbounded (`src/main.tsx`).
+- Заголовок героя анимируется по словам (`SplitText` в `src/components/Motion.tsx`) — переводить надо всю фразу целиком до разбивки на слова.
+- Проверить, что на каждом языке ничего не вылезает за края на телефоне.
+
+### 3. Тулпар на Gemini (ключ только на сервере)
+
+Сейчас серверная функция `shared/tulpar-core.mjs` (вызывается из `netlify/functions/chat.mjs` по адресу `/api/chat`) умеет только Claude. Нужно:
+
+- Если задан `GEMINI_API_KEY`, звать Google Gemini: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, ключ в заголовке `x-goog-api-key`, системный промпт в `systemInstruction`, история в `contents` (роли `user` / `model`), `generationConfig.responseMimeType = "application/json"`. Модель можно переопределить через `GEMINI_MODEL`.
+- Ответ в том же JSON, что и сейчас: `reply`, `chips`, `quote`, `handoff`.
+- Браузер передаёт выбранный язык (`lang`) в `/api/chat` (`src/lib/ai.ts`), и Тулпар отвечает на этом языке (хинди — деванагари, казахский — кириллицей). Если турист пишет на другом языке, отвечать на его языке.
+- **Ключ никогда не кладём в код и в GitHub.** Только в Netlify: Site configuration → Environment variables → `GEMINI_API_KEY`, потом Deploys → Trigger deploy.
+- Без ключа всё работает как сейчас (офлайн-движок), демо не ломается.
+- В шапке чата и на странице `/chat` писать «Connected to Gemini», когда отвечает Gemini.
+- Обновить упоминания Claude на странице About и в этом README.
+
+### Проверка перед пушем
+
+- [ ] `npm test` — все тесты зелёные
+- [ ] `npm run build` — без ошибок
+- [ ] Перетащил Тулпара в каждый из 7 мест, перезагрузил страницу — место сохранилось
+- [ ] Прошёл бронь на всех 4 языках: главная → тур → оплата (тестовый код 123456) → Trip Pass
+- [ ] На zerttex.netlify.app с ключом Тулпар отвечает на хинди, если выбран हिन्दी
 
 ---
 
