@@ -29,11 +29,11 @@ Zerttex Hackathon 2026, Stage 1, Case 1: Technology Product. Team **РыбаЕж
 
 ---
 
-## 🛠 Задачи для команды (до финала 29 октября)
+## 🛠 Задачи для команды (до финала 29 октября) — ✅ сделано
 
 > Срок: залить в `main` до **28 октября, 23:59** — потом сайт менять нельзя. После пуша Netlify сам пересоберёт https://zerttex.netlify.app. Перед пушем: `npm test` и `npm run build` должны пройти без ошибок.
 
-### 1. Тулпара можно перетаскивать по экрану
+### 1. ✅ Тулпара можно перетаскивать по экрану
 
 Сейчас кнопка «Ask Tulpar» и окно чата всегда в правом нижнем углу (`src/components/Chat.tsx`, компонент `ChatWidget`; стили `.chat-fab` и `.chat-pop` в `src/styles.css`).
 
@@ -46,7 +46,7 @@ Zerttex Hackathon 2026, Stage 1, Case 1: Technology Product. Team **РыбаЕж
 - На телефоне (ширина ≤ 520px) окно чата остаётся на весь экран, перетаскивается только кнопка.
 - Подсказка: во framer-motion есть `drag`, `useDragControls`, `useMotionValue`, `animate`.
 
-### 2. Сайт на 4 языках: English, हिन्दी, Русский, Қазақша
+### 2. ✅ Сайт на 4 языках: English, हिन्दी, Русский, Қазақша
 
 - В шапке рядом с выбором валюты — переключатель языка `EN · हि · РУ · ҚАЗ`. Выбор запоминается (`localStorage`, ключ `sg.lang`), `<html lang>` меняется.
 - Переводится весь интерфейс: шапка, подвал, все страницы (`src/pages/*`), чат, карточки цены, тексты туров и правил из `shared/knowledge.json`, приветствие и кнопки-подсказки Тулпара.
@@ -55,7 +55,9 @@ Zerttex Hackathon 2026, Stage 1, Case 1: Technology Product. Team **РыбаЕж
 - Заголовок героя анимируется по словам (`SplitText` в `src/components/Motion.tsx`) — переводить надо всю фразу целиком до разбивки на слова.
 - Проверить, что на каждом языке ничего не вылезает за края на телефоне.
 
-### 3. Тулпар на Gemini (ключ только на сервере)
+### 3. ✅ Тулпар на Gemini (ключ только на сервере)
+
+> Осталось сделать вручную: добавить `GEMINI_API_KEY` в Netlify (см. ниже) и нажать Trigger deploy.
 
 Сейчас серверная функция `shared/tulpar-core.mjs` (вызывается из `netlify/functions/chat.mjs` по адресу `/api/chat`) умеет только Claude. Нужно:
 
@@ -139,6 +141,8 @@ China is larger (960,000+ visitors in 2025), but it needs a separate app and pay
 - **Motion with a purpose** (Framer Motion): parallax photo hero with a word-by-word headline, a floating 3D phone that replays a real booking, an endless photo strip, 3D tilt cards with a light reflection, animated trip filters, a progress line that draws as you scroll through the steps, count-up numbers, a full-screen photo viewer with keyboard arrows, a Ken Burns guide intro, confetti and a 3D Trip Pass flip after payment, auto-playing live trip tracking and animated dashboard charts.
 - **Every button works:** share (system share sheet or copy link), Ask Tulpar from any trip, reply to handoffs in the operator inbox, split-payment links, calendar file, WhatsApp share and a sample Trip Pass when a link is opened on another device.
 - Motion respects the system *reduce motion* setting.
+- **Four languages:** English, हिन्दी, Русский and Қазақша from the switch in the header (remembered in `sg.lang`); pages, chat, prices cards, trips and policies are translated (`src/i18n/*.ts`, loaded on demand), with Noto Sans Devanagari for Hindi and Cyrillic Extended fonts for Kazakh letters.
+- **Draggable Tulpar:** drag the chat button or the chat window by its header; it snaps to the nearest of 7 spots and remembers it (`sg.chatSpot`).
 
 ## Four complaints, four features
 
@@ -194,7 +198,7 @@ Tulpar has **two engines behind one interface** ([`src/lib/ai.ts`](src/lib/ai.ts
 ```mermaid
 flowchart LR
   U[Traveler message] --> T{"API key set on the server?"}
-  T -- yes --> L[Claude Haiku<br/>system prompt = approved knowledge base]
+  T -- yes --> L[Google Gemini 2.5 Flash<br/>system prompt = approved knowledge base]
   T -- no --> D[Offline demo engine<br/>intents + slot filling]
   L --> R[Reply + chips + optional quote + handoff flag]
   D --> R
@@ -208,7 +212,7 @@ flowchart LR
 - Snaps a wanted date to the trip’s real departure days and says so.
 - Topics outside the knowledge base (eSIM, ATMs…) are **never guessed**: they go to a person.
 
-**LLM mode** ([`shared/tulpar-core.mjs`](shared/tulpar-core.mjs)) — a serverless function sends the last 12 messages to **Claude Haiku** with the knowledge base as the only source of facts and asks for strict JSON: `reply`, `chips`, `quote`, `handoff`. Prices and seats are re-checked against the knowledge base in the browser before a quote is shown. One ten-message conversation costs about 2–3 ₸.
+**LLM mode** ([`shared/tulpar-core.mjs`](shared/tulpar-core.mjs)) — a serverless function sends the last 12 messages to **Google Gemini** (`gemini-2.5-flash`, JSON response mode) with the knowledge base as the only source of facts and asks for strict JSON: `reply`, `chips`, `quote`, `handoff`. The browser sends the chosen site language, and Tulpar answers in it (Hindi in Devanagari, Kazakh in Cyrillic), or in the traveler's own language if they write in another one. The API key lives only in the hosting provider's environment variables, never in the code or the browser. Prices and seats are re-checked against the knowledge base in the browser before a quote is shown.
 
 **Measured:** 50 typical questions, written by the team → **48/50 on the first run, 50/50** after fixing two gaps. 20 new questions that were never used for tuning → **16/20 (80%)**. That gap is exactly why the MVP uses the LLM mode with a 90% target.
 
@@ -227,7 +231,7 @@ flowchart TB
   end
   subgraph Core[Booking core: Node.js on a Kazakhstan cloud]
     API[Booking API: trips, seats, quotes, bookings]
-    AI[Tulpar: Claude Haiku + knowledge base]
+    AI[Tulpar: Gemini + knowledge base]
     DB[(PostgreSQL: personal data stored in Kazakhstan)]
   end
   PAY[Acquiring bank: hosted payment page, 3-D Secure, PCI DSS]
@@ -248,7 +252,7 @@ flowchart TB
 |---|---|---|
 | Web app | React 18 + TypeScript + Vite, PWA | Fast on mobile, installable, one codebase |
 | Chat channels | WhatsApp Business Cloud API, Instagram messaging | Where Indian travelers already talk to businesses |
-| AI | Claude Haiku 5.5 ($0.10 / $0.50 per million input / output tokens) | Cheap, fast, follows a grounded system prompt |
+| AI | Google Gemini 2.5 Flash (Gemini API, JSON mode) | Cheap, fast, multilingual (Hindi, Russian, Kazakh), follows a grounded system prompt |
 | Booking API | Node.js + PostgreSQL on a Kazakhstan cloud | Personal data must be stored in Kazakhstan |
 | Payments | Hosted page of a Kazakhstan acquiring bank | Foreign cards, 3-D Secure, no card data on our servers |
 | Hosting | Vercel or Netlify (static + one function) | Free tier for the pilot, global CDN |
@@ -273,7 +277,7 @@ All amounts in tenge (₸). 1 USD = 451.05 ₸, 1 INR = 4.75 ₸ (National Bank 
 |---|---|
 | Development: MVP team for 12 weeks + support for 9 months + content + legal and payment setup | 11,600,000 |
 | Launch in India: Click-to-WhatsApp ads, travel creators, student ambassadors | 4,950,000 |
-| Running: hosting in Kazakhstan, Claude API, WhatsApp, software | 1,755,000 |
+| Running: hosting in Kazakhstan, Gemini API, WhatsApp, software | 1,755,000 |
 | Contingency | 1,600,000 |
 | **Total (budget 20,000,000)** | **19,905,000** |
 
@@ -303,7 +307,7 @@ All amounts in tenge (₸). 1 USD = 451.05 ₸, 1 INR = 4.75 ₸ (National Bank 
 | 1–2 | Interviews with Indian students and guides, journey map, wireframes; bank and Meta applications | Clickable design, partners applied |
 | 3–4 | Booking core: trips, departures, seats, 3 currencies, admin | Catalogue on a test server |
 | 5–6 | Payments: hosted page, 3-D Secure, deposit and split links, Trip Pass | First real payment from an Indian card |
-| 7–8 | Tulpar: knowledge base, Claude, WhatsApp Cloud API, handoff inbox | 90% correct on 100 real questions |
+| 7–8 | Tulpar: knowledge base, Gemini, WhatsApp Cloud API, handoff inbox | 90% correct on 100 real questions |
 | 9 | Trust layer: company page, guide videos, verified reviews, live view | All trust features live |
 | 10 | Testing, security and privacy review, analytics | Release candidate |
 | 11 | Closed beta with 30 Indian students and 5 guides | Beta report |
@@ -350,14 +354,16 @@ npm run build:single  # the whole app as one HTML file in dist-single/ (works of
 **Vercel:** click **Deploy with Vercel** above, or import the repo at vercel.com/new. `vercel.json` sets the build and SPA routing.
 **Netlify:** click **Deploy to Netlify**; `netlify.toml` sets the build, SPA fallback and the `/api/*` function route.
 
-### Switch Tulpar to Claude (optional)
+### Switch Tulpar to Gemini (optional)
 
 Without a key, Tulpar uses the offline demo engine, so the demo always works. To turn on the LLM mode, add environment variables in the Vercel or Netlify project settings:
 
 ```
-ANTHROPIC_API_KEY=sk-ant-...
-TULPAR_MODEL=claude-haiku-5-5   # optional
+GEMINI_API_KEY=...              # Netlify: Site configuration → Environment variables, then Deploys → Trigger deploy
+GEMINI_MODEL=gemini-2.5-flash   # optional
 ```
+
+**Never put the key in the code or in GitHub.** The chat header and the `/chat` page show “Connected to Gemini” when Gemini answers. (`ANTHROPIC_API_KEY` still works as an alternative and is used only when `GEMINI_API_KEY` is empty.)
 
 ---
 
@@ -368,7 +374,7 @@ TULPAR_MODEL=claude-haiku-5-5   # optional
 ├── netlify/functions/chat.mjs    Same function for Netlify
 ├── shared/
 │   ├── knowledge.json            Trips, prices, policies, guides: the single source of truth
-│   └── tulpar-core.mjs           Grounded prompt + Claude call, strict JSON output
+│   └── tulpar-core.mjs           Grounded prompt + Gemini call (key on the server only), strict JSON output
 ├── src/
 │   ├── lib/
 │   │   ├── tulpar.ts             Offline intent + slot-filling engine
@@ -413,7 +419,7 @@ Market and payment figures in this README come from the sources below (all opene
 - [Kazakhstan Today](https://www.kt.kz/eng/government/nearly_16_million_foreign_visitors_traveled_to_kazakhstan_1377999157.html): 2025 visitors, China growth
 - [Intelligent CIO](https://www.intelligentcio.com/apac/2025/08/14/alipay-and-kaspi-kz-enable-international-payment-acceptance-in-kazakhstan/): Alipay+ via Kaspi QR
 - [timeanddate.com](https://www.timeanddate.com/news/time/kazakhstan-single-time-zone.html): Kazakhstan single time zone
-- [Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing): Claude Haiku 5.5 price
+- [Gemini API documentation](https://ai.google.dev/gemini-api/docs): Tulpar's LLM mode
 - [National Bank of Kazakhstan](https://nationalbank.kz/en/exchangerates/ezhednevnye-oficialnye-rynochnye-kursy-valyut): exchange rates
 
 ---

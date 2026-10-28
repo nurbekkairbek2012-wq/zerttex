@@ -3569,3 +3569,154 @@ input[readonly] {
 .guide-card__art.photo {
   object-fit: cover;
 }
+
+/* ---------- draggable Tulpar dock ---------- */
+.dock {
+  position: fixed;
+  left: 0;
+  top: 0;
+  touch-action: none;
+}
+.dock--fab {
+  z-index: 40;
+}
+.dock--pop {
+  z-index: 50;
+}
+.dock .chat-fab,
+.dock .chat-pop {
+  position: relative;
+  right: auto;
+  bottom: auto;
+}
+.dock .chat-fab {
+  cursor: grab;
+}
+.dock.is-dragging .chat-fab,
+.dock.is-dragging .chat-head--drag {
+  cursor: grabbing;
+}
+.chat-head--drag {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.dock-guides {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  pointer-events: none;
+}
+.dock-guide {
+  position: fixed;
+  border-radius: 24px;
+  border: 2px dashed color-mix(in srgb, var(--lake) 55%, transparent);
+  background: color-mix(in srgb, var(--lake) 6%, transparent);
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.dock-guide.is-on {
+  border-style: solid;
+  border-color: var(--lake);
+  background: color-mix(in srgb, var(--lake) 20%, transparent);
+  transform: scale(1.03);
+}
+.dock--fab ~ .dock-guides .dock-guide,
+.dock-guides:has(+ .dock--fab) .dock-guide {
+  border-radius: 999px;
+}
+.dock .chat-pop {
+  height: min(660px, calc(100dvh - 150px));
+}
+
+/* ---------- language switch ---------- */
+.lang button {
+  min-width: 34px;
+  font-weight: 600;
+}
+.lang button[lang='hi'] {
+  font-family: 'Noto Sans Devanagari', var(--body);
+}
+@media (max-width: 480px) {
+  .nav__right {
+    gap: 6px;
+  }
+  .lang button,
+  .cur button {
+    min-width: 0;
+    padding: 7px 6px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 430px) {
+  .brand__name {
+    display: none;
+  }
+}
+/* Devanagari needs its own font and a little more line height. */
+:lang(hi) body,
+html[lang='hi'] body {
+  font-family: var(--body), 'Noto Sans Devanagari', sans-serif;
+}
+html[lang='hi'] h1,
+html[lang='hi'] h2,
+html[lang='hi'] h3 {
+  font-family: var(--display), 'Noto Sans Devanagari', sans-serif;
+  line-height: 1.3;
+}
+/* Longer words in Russian and Kazakh: let headings break instead of overflowing. */
+html[lang='ru'] h1,
+html[lang='ru'] h2,
+html[lang='kk'] h1,
+html[lang='kk'] h2 {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+/* Longer words in other languages: smaller hero titles, roomier masks for Devanagari. */
+html[lang='ru'] .hero2__title,
+html[lang='kk'] .hero2__title {
+  font-size: clamp(30px, 4.6vw, 60px);
+}
+html[lang='hi'] .hero2__title {
+  font-size: clamp(32px, 4.8vw, 64px);
+}
+html[lang='hi'] .split__mask {
+  padding-top: 0.12em;
+  padding-bottom: 0.3em;
+  margin-bottom: -0.3em;
+}
+/* Longer menu labels in Hindi, Russian and Kazakh: switch to the menu button earlier. */
+@media (max-width: 1360px) {
+  html:not([lang='en']) .nav {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  html:not([lang='en']) .nav__burger {
+    display: inline-grid;
+  }
+  html:not([lang='en']) .nav__cta {
+    display: none;
+  }
+  html:not([lang='en']) .nav__right {
+    margin-left: auto;
+  }
+  html:not([lang='en']) .nav__links {
+    display: none;
+    order: 5;
+    width: 100%;
+    flex-direction: column;
+    margin: 0;
+    padding: 8px 0;
+  }
+  html:not([lang='en']) .nav__links.is-open {
+    display: flex;
+  }
+  html:not([lang='en']) .nav__links a {
+    padding: 12px;
+  }
+}
+html[lang='ru'] .split__mask,
+html[lang='kk'] .split__mask {
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+}

@@ -1,5 +1,5 @@
 // Netlify function: POST /api/chat (mapped in netlify.toml)
-// Set ANTHROPIC_API_KEY in Netlify -> Site configuration -> Environment variables to switch Tulpar to Claude.
+// Set GEMINI_API_KEY in Netlify -> Site configuration -> Environment variables to switch Tulpar to Gemini (never commit the key).
 import { handleChat } from '../../shared/tulpar-core.mjs';
 
 export default async (req) => {

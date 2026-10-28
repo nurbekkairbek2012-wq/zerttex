@@ -1,3 +1,4 @@
+import { useT } from '../lib/i18n';
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
 import { BadgeCheck, ChevronDown, CreditCard, MapPinned, MessageCircle, Minus, Plus, ShieldCheck, Star, Video } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
@@ -19,7 +20,8 @@ const sampleReviews = [
   { name: 'Sneha, Hyderabad', trip: 'Great Kazakhstan Week', text: 'The guide sent a video before the trip, so meeting her at the airport felt like meeting a friend.' },
 ];
 
-const faqs = [
+// Built on render so the answers follow the chosen language.
+const faqs = () => [
   { q: 'Do Indian citizens need a visa?', a: policies.visa },
   { q: 'Will my Indian card work?', a: `${policies.payments} ${policies.indianCards}` },
   { q: 'Is vegetarian food available?', a: policies.food },
@@ -61,6 +63,7 @@ function Faq({ q, a }: { q: string; a: string }) {
 }
 
 export default function Home() {
+  const tx = useT();
   const { currency, openChatWith } = useStore();
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
@@ -71,9 +74,9 @@ export default function Home() {
   const shown = useMemo(
     () =>
       trips.filter((t) =>
-        filter === 'all' ? true : filter === 'short' ? t.days === 2 : filter === 'three' ? t.days === 3 : filter === 'week' ? t.days >= 7 : filter === 'almaty' ? t.start === 'Almaty' : t.start === 'Astana',
+        filter === 'all' ? true : filter === 'short' ? t.days === 2 : filter === 'three' ? t.days === 3 : filter === 'week' ? t.days >= 7 : filter === 'almaty' ? t.start === tx('Almaty') : t.start === tx('Astana'),
       ),
-    [filter],
+    [filter, tx],
   );
   const stepsRef = useRef<HTMLOListElement>(null);
   const { scrollYProgress: stepsProgress } = useScroll({ target: stepsRef, offset: ['start 85%', 'end 60%'] });
@@ -90,44 +93,38 @@ export default function Home() {
         <motion.div className="hero2__inner" style={{ y: textY, opacity: fade }}>
           <div className="hero2__copy">
             <motion.p className="hero2__pill" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <span className="dot" /> Now booking on WhatsApp for travelers from India
-            </motion.p>
-            <SplitText text="Kazakhstan’s canyons and mountain lakes, booked in one chat." className="hero2__title" delay={0.3} />
-            <motion.p className="hero2__lead" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 0.8 }}>
-              Ask Tulpar on WhatsApp or here. Get one clear price card with everything included, pay with your own card, and send your family a live Trip Pass.
-            </motion.p>
+              <span className="dot" />{' '}{tx("Now booking on WhatsApp for travelers from India")}</motion.p>
+            <SplitText key={tx("Kazakhstan’s canyons and mountain lakes, booked in one chat.")} text={tx("Kazakhstan’s canyons and mountain lakes, booked in one chat.")} className="hero2__title" delay={0.3} />
+            <motion.p className="hero2__lead" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 0.8 }}>{tx("Ask Tulpar on WhatsApp or here. Get one clear price card with everything included, pay with your own card, and send your family a live Trip Pass.")}</motion.p>
             <motion.div className="hero__cta" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3, duration: 0.8 }}>
               <motion.button type="button" className="btn btn--sun btn--lg" onClick={() => openChatWith('Show me the trips')} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                <MessageCircle size={20} aria-hidden="true" /> Plan my trip with Tulpar
-              </motion.button>
-              <motion.button type="button" className="btn btn--glass btn--lg" onClick={scrollToTrips} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
-                Browse trips
-              </motion.button>
+                <MessageCircle size={20} aria-hidden="true" />{' '}{tx("Plan my trip with Tulpar")}</motion.button>
+              <motion.button type="button" className="btn btn--glass btn--lg" onClick={scrollToTrips} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>{tx("Browse trips")}</motion.button>
             </motion.div>
             <motion.dl className="hero2__stats" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}>
               <div>
                 <dt>
                   <CountUp to={146000} suffix="+" />
                 </dt>
-                <dd>Indian travelers came in 2024</dd>
+                <dd>{tx("Indian travelers came in 2024")}</dd>
               </div>
               <div>
                 <dt>
-                  <CountUp to={14} suffix=" days" />
+                  <CountUp to={14} suffix={` ${tx("days")}`} />
                 </dt>
-                <dd>visa-free for Indians</dd>
+                <dd>{tx("visa-free for Indians")}</dd>
               </div>
               <div>
                 <dt>
-                  <CountUp to={3.5} decimals={1} suffix=" h" />
+                  <CountUp to={3.5} decimals={1} suffix={` ${tx("h")}`} />
                 </dt>
-                <dd>direct flight from Delhi</dd>
+                <dd>{tx("direct flight from Delhi")}</dd>
               </div>
               <div>
                 <dt>
-                  <CountUp to={5} suffix=" min" />
+                  <CountUp to={5} suffix={` ${tx("min")}`} />
                 </dt>
-                <dd>to a confirmed booking</dd>
+                <dd>{tx("to a confirmed booking")}</dd>
               </div>
             </motion.dl>
           </div>
@@ -143,31 +140,31 @@ export default function Home() {
             </motion.div>
           </motion.div>
         </motion.div>
-        <motion.button type="button" className="hero2__scroll" onClick={scrollToTrips} aria-label="Scroll to trips" animate={{ y: [0, 10, 0] }} transition={{ duration: 1.8, repeat: Infinity }}>
+        <motion.button type="button" className="hero2__scroll" onClick={scrollToTrips} aria-label={tx("Scroll to trips")} animate={{ y: [0, 10, 0] }} transition={{ duration: 1.8, repeat: Infinity }}>
           <ChevronDown />
         </motion.button>
-        <span className="hero2__credit">Photo: Kolsai Lake, {photos.kolsai.author}, {photos.kolsai.license}</span>
+        <span className="hero2__credit">{tx("Photo: Kolsai Lake,")}{' '}{photos.kolsai.author}, {photos.kolsai.license}</span>
       </section>
 
       <Marquee speed={55}>
         {strip.map((id) => (
           <div className="strip__item" key={id}>
             <Photo id={id} sizes="260px" width={500} />
-            <span>{photos[id].place}</span>
+            <span>{tx(photos[id].place)}</span>
           </div>
         ))}
       </Marquee>
 
       <section className="section" id="trips">
         <Reveal className="section__head">
-          <h2>Five routes, prices with everything in</h2>
-          <p>Per person, in {currency === 'INR' ? 'rupees' : currency === 'USD' ? 'US dollars' : 'tenge'}. Transport, English-speaking guide, stay, meals and park fees are always included.</p>
+          <h2>{tx("Five routes, prices with everything in")}</h2>
+          <p>{tx("Per person, in")}{' '}{tx(currency === 'INR' ? 'rupees' : currency === 'USD' ? 'US dollars' : 'tenge')}{tx(". Transport, English-speaking guide, stay, meals and park fees are always included.")}</p>
         </Reveal>
-        <div className="filters" role="group" aria-label="Filter trips">
+        <div className="filters" role="group" aria-label={tx("Filter trips")}>
           {filters.map((f) => (
             <button key={f.id} type="button" className={`filter ${filter === f.id ? 'is-on' : ''}`} aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
               {filter === f.id && <motion.span layoutId="filter-pill" className="filter__pill" transition={{ type: 'spring', stiffness: 400, damping: 32 }} />}
-              <span className="filter__label">{f.label}</span>
+              <span className="filter__label">{tx(f.label)}</span>
             </button>
           ))}
         </div>
@@ -188,12 +185,12 @@ export default function Home() {
                   <Link to={`/trips/${t.id}`} className="tcard__link">
                     <Photo id={coverOf(t.id)} sizes="(max-width: 700px) 100vw, 50vw" width={960} className="tcard__photo" />
                     <div className="tcard__shade" />
-                    <span className="tcard__days">{t.days} days</span>
+                    <span className="tcard__days">{t.days}{' '}{tx("days")}</span>
                     <div className="tcard__body">
                       <h3>{t.name}</h3>
                       <p>{t.tagline}</p>
                       <div className="tcard__foot">
-                        <span>From {t.start}</span>
+                        <span>{tx("From")}{' '}{t.start}</span>
                         <strong>{money(t.priceKZT, currency)}</strong>
                       </div>
                     </div>
@@ -207,8 +204,8 @@ export default function Home() {
 
       <section className="section how">
         <Reveal className="section__head">
-          <h2>How booking works</h2>
-          <p>Three steps, about five minutes, in the app you already use.</p>
+          <h2>{tx("How booking works")}</h2>
+          <p>{tx("Three steps, about five minutes, in the app you already use.")}</p>
         </Reveal>
         <ol className="steps steps--anim" ref={stepsRef}>
           <svg className="steps__line" viewBox="0 0 1000 4" preserveAspectRatio="none" aria-hidden="true">
@@ -223,8 +220,8 @@ export default function Home() {
               <motion.span className="steps__n" initial={{ scale: 0, rotate: -90 }} whileInView={{ scale: 1, rotate: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 + i * 0.18, type: 'spring', stiffness: 260, damping: 14 }}>
                 {i + 1}
               </motion.span>
-              <h3>{h}</h3>
-              <p>{p}</p>
+              <h3>{tx(h)}</h3>
+              <p>{tx(p)}</p>
             </motion.li>
           ))}
         </ol>
@@ -236,44 +233,42 @@ export default function Home() {
         </motion.div>
         <div className="band__shade" />
         <div className="band__inner">
-          <SplitText as="h2" text="Delhi to the Valley of Castles: one flight, one chat." className="band__title" />
+          <SplitText key={tx("Delhi to the Valley of Castles: one flight, one chat.")} as="h2" text={tx("Delhi to the Valley of Castles: one flight, one chat.")} className="band__title" />
           <Reveal delay={0.4}>
-            <Link to="/trips/charyn-canyon" className="btn btn--sun btn--lg">
-              See the Charyn trip
-            </Link>
+            <Link to="/trips/charyn-canyon" className="btn btn--sun btn--lg">{tx("See the Charyn trip")}</Link>
           </Reveal>
         </div>
-        <span className="hero2__credit">Photo: Charyn Canyon, {photos.charyn.author}, {photos.charyn.license}</span>
+        <span className="hero2__credit">{tx("Photo: Charyn Canyon,")}{' '}{photos.charyn.author}, {photos.charyn.license}</span>
       </section>
 
       <section className="section trust-strip">
         <OrnamentBand className="trust-strip__band" color="#F4B400" />
         <div className="trust-strip__inner">
-          <SplitText as="h2" text="Built to answer “can I trust them?”" />
+          <SplitText key={tx("Built to answer “can I trust them?”")} as="h2" text={tx("Built to answer “can I trust them?”")} />
           <dl className="trust-nums">
             <div>
               <dt>
                 <CountUp to={company.founded} duration={1.6} group={false} />
               </dt>
-              <dd>running trips since</dd>
+              <dd>{tx("running trips since")}</dd>
             </div>
             <div>
               <dt>
                 <CountUp to={company.guides} />
               </dt>
-              <dd>local guides with checked IDs</dd>
+              <dd>{tx("local guides with checked IDs")}</dd>
             </div>
             <div>
               <dt>
                 <CountUp to={company.travelers2025} />
               </dt>
-              <dd>travelers in 2025</dd>
+              <dd>{tx("travelers in 2025")}</dd>
             </div>
             <div>
               <dt>
-                <CountUp to={72} suffix=" h" />
+                <CountUp to={72} suffix={` ${tx("h")}`} />
               </dt>
-              <dd>free cancellation window</dd>
+              <dd>{tx("free cancellation window")}</dd>
             </div>
           </dl>
           <div className="trust-grid">
@@ -289,43 +284,39 @@ export default function Home() {
                   <motion.span className="trust-grid__icon" whileHover={{ rotate: 12, scale: 1.15 }}>
                     <I aria-hidden="true" />
                   </motion.span>
-                  <h3>{h as string}</h3>
-                  <p>{p as string}</p>
+                  <h3>{tx(h as string)}</h3>
+                  <p>{tx(p as string)}</p>
                 </motion.div>
               );
             })}
           </div>
-          <Link to="/trust" className="btn btn--sun">
-            See all trust checks
-          </Link>
+          <Link to="/trust" className="btn btn--sun">{tx("See all trust checks")}</Link>
           <ul className="hero__proof hero__proof--dark">
             <li>
-              <CreditCard size={18} aria-hidden="true" /> Visa, Mastercard, Apple Pay, Google Pay
-            </li>
+              <CreditCard size={18} aria-hidden="true" />{' '}{tx("Visa, Mastercard, Apple Pay, Google Pay")}</li>
             <li>
-              <ShieldCheck size={18} aria-hidden="true" /> 3-D Secure through a licensed Kazakhstan bank
-            </li>
+              <ShieldCheck size={18} aria-hidden="true" />{' '}{tx("3-D Secure through a licensed Kazakhstan bank")}</li>
           </ul>
         </div>
       </section>
 
       <section className="section reviews2">
         <Reveal className="section__head">
-          <h2>What travelers say</h2>
-          <p>Sample reviews for the prototype, showing how verified reviews will appear.</p>
+          <h2>{tx("What travelers say")}</h2>
+          <p>{tx("Sample reviews for the prototype, showing how verified reviews will appear.")}</p>
         </Reveal>
       </section>
       <Marquee speed={70}>
         {sampleReviews.map((r) => (
           <figure key={r.name} className="review review--strip">
-            <div className="review__stars" role="img" aria-label="5 out of 5">
+            <div className="review__stars" role="img" aria-label={tx("5 out of 5")}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} size={16} fill="currentColor" aria-hidden="true" />
               ))}
             </div>
-            <blockquote>{r.text}</blockquote>
+            <blockquote>{tx(r.text)}</blockquote>
             <figcaption>
-              {r.name}, {r.trip} <span className="verified">Verified trip</span>
+              {tx(r.name)}, {tx(r.trip)} <span className="verified">{tx("Verified trip")}</span>
             </figcaption>
           </figure>
         ))}
@@ -333,11 +324,11 @@ export default function Home() {
 
       <section className="section faq">
         <Reveal className="section__head">
-          <h2>Questions travelers from India ask first</h2>
+          <h2>{tx("Questions travelers from India ask first")}</h2>
         </Reveal>
         <div className="faq__list">
-          {faqs.map((f) => (
-            <Faq key={f.q} q={f.q} a={f.a} />
+          {faqs().map((f) => (
+            <Faq key={f.q} q={tx(f.q)} a={f.a} />
           ))}
         </div>
       </section>
@@ -348,11 +339,10 @@ export default function Home() {
         </div>
         <div className="cta2__shade" />
         <Reveal className="cta2__inner">
-          <h2>Tell Tulpar where you want to go.</h2>
-          <p>It knows every route, date and price, and hands over to a person whenever you want.</p>
+          <h2>{tx("Tell Tulpar where you want to go.")}</h2>
+          <p>{tx("It knows every route, date and price, and hands over to a person whenever you want.")}</p>
           <motion.button type="button" className="btn btn--sun btn--lg pulse" onClick={() => openChatWith('Hi')} whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}>
-            <MessageCircle size={20} aria-hidden="true" /> Start the chat
-          </motion.button>
+            <MessageCircle size={20} aria-hidden="true" />{' '}{tx("Start the chat")}</motion.button>
         </Reveal>
       </section>
     </>

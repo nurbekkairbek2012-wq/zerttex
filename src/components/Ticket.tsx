@@ -1,3 +1,4 @@
+import { plural, useT } from '../lib/i18n';
 import {
   BedDouble, Bus, GlassWater, Languages, Plane, Share2, ShieldCheck, Smartphone, Ticket as TicketIcon, UtensilsCrossed, X,
   type LucideIcon,
@@ -60,6 +61,7 @@ export function TripTicket({
 }: {
   tripId: string; date?: string; people?: number; meal?: Meal; variant?: 'full' | 'chat'; actions?: boolean; source?: 'web' | 'chat';
 }) {
+  const tx = useT();
   const { currency } = useStore();
   const trip = tripById(tripId);
   if (!trip) return null;
@@ -71,22 +73,22 @@ export function TripTicket({
   // Group decisions happen in WhatsApp groups: share the same card as text with a booking link.
   const base = typeof window !== 'undefined' && /^https?:$/.test(window.location.protocol) ? `${window.location.origin}${window.location.pathname}` : '';
   const shareText = [
-    `${trip.name}, ${trip.days} days from ${trip.start}${date ? `, ${fmtDate(parseIso(date), { weekday: 'short', day: 'numeric', month: 'short' })}` : ''}`,
-    `${n} ${n === 1 ? 'traveler' : 'travelers'}: ${money(total, currency)} total, all included (${trip.included.map((k) => inclusionLabels[k].split(',')[0].toLowerCase()).join(', ')}).`,
-    base ? `Book or split the cost: ${base}#/book/${trip.id}?${q.toString()}&mode=split` : '',
+    `${trip.name}, ${tx('{n} days from {place}', { n: trip.days, place: trip.start })}${date ? `, ${fmtDate(parseIso(date), { weekday: 'short', day: 'numeric', month: 'short' })}` : ''}`,
+    `${plural(n, '{n} traveler', '{n} travelers')}: ${tx('{price} total, all included', { price: money(total, currency) })} (${trip.included.map((k) => inclusionLabels[k].split(',')[0].toLowerCase()).join(', ')}).`,
+    base ? `${tx('Book or split the cost:')} ${base}#/book/${trip.id}?${q.toString()}&mode=split` : '',
   ]
     .filter(Boolean)
     .join('\n');
   const waHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
   return (
-    <article className={`ticket ticket--${variant}`} aria-label={`Clear-price card for ${trip.name}`}>
+    <article className={`ticket ticket--${variant}`} aria-label={tx('Clear-price card for {trip}', { trip: trip.name })}>
       <div className="ticket__stub">
         <Photo id={coverOf(trip.id)} width={960} sizes="420px" className="ticket__art" />
         <div className="ticket__title">
           <h3>{trip.name}</h3>
           <p>
-            {trip.days} days from {trip.start}
+            {trip.days}{' '}{tx("days from")}{' '}{trip.start}
             {date ? `, ${fmtDate(parseIso(date), { weekday: 'short', day: 'numeric', month: 'short' })}` : ''}
           </p>
         </div>
@@ -95,36 +97,32 @@ export function TripTicket({
       <div className="ticket__body">
         <dl className="ticket__facts">
           <div>
-            <dt>Travelers</dt>
+            <dt>{tx("Travelers")}</dt>
             <dd>{n}</dd>
           </div>
           <div>
-            <dt>Food</dt>
-            <dd>{meal ? mealLabel[meal] : 'Veg options daily'}</dd>
+            <dt>{tx("Food")}</dt>
+            <dd>{meal ? tx(mealLabel[meal]) : tx('Veg options daily')}</dd>
           </div>
           <div>
-            <dt>Guide</dt>
+            <dt>{tx("Guide")}</dt>
             <dd>{g?.name}</dd>
           </div>
         </dl>
         <InclusionList trip={trip} compact />
         <div className="ticket__total">
           <div>
-            <span className="ticket__total-label">Total, all included</span>
+            <span className="ticket__total-label">{tx("Total, all included")}</span>
             <strong>{money(total, currency)}</strong>
-            {currency !== 'KZT' && <span className="ticket__kzt">charged as {money(total, 'KZT')}</span>}
+            {currency !== 'KZT' && <span className="ticket__kzt">{tx("charged as")}{' '}{money(total, 'KZT')}</span>}
           </div>
           {actions && (
             <div className="ticket__actions">
-              <Link className="btn btn--primary" to={`/book/${trip.id}?${q.toString()}&mode=deposit`}>
-                Pay 20% now ({money(deposit, currency)})
+              <Link className="btn btn--primary" to={`/book/${trip.id}?${q.toString()}&mode=deposit`}>{tx("Pay 20% now (")}{money(deposit, currency)})
               </Link>
-              <Link className="btn btn--ghost" to={`/book/${trip.id}?${q.toString()}&mode=full`}>
-                Pay in full
-              </Link>
+              <Link className="btn btn--ghost" to={`/book/${trip.id}?${q.toString()}&mode=full`}>{tx("Pay in full")}</Link>
               <a className="btn btn--link ticket__share" href={waHref} target="_blank" rel="noreferrer">
-                <Share2 size={16} aria-hidden="true" /> Share to group chat
-              </a>
+                <Share2 size={16} aria-hidden="true" />{' '}{tx("Share to group chat")}</a>
             </div>
           )}
         </div>

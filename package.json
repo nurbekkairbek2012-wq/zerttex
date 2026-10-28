@@ -12,6 +12,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@fontsource/noto-sans-devanagari": "^5.3.0",
     "@fontsource/onest": "^5.1.0",
     "@fontsource/unbounded": "^5.1.0",
     "canvas-confetti": "^1.9.3",

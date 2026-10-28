@@ -1,3 +1,4 @@
+import { useT } from '../lib/i18n';
 import { motion } from 'framer-motion';
 import { BatteryMedium, Pause, Phone, Play, Radio } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -9,6 +10,7 @@ import { useStore } from '../lib/store';
 
 /** Family view: where the group is right now. In production fed by the guide app's GPS check-ins. */
 export default function Live() {
+  const tx = useT();
   const { code } = useParams();
   const { bookings } = useStore();
   const b = bookings.find((x) => x.code === code);
@@ -25,9 +27,9 @@ export default function Live() {
   const gallery = tripPhotos[trip.id] ?? ['kolsai'];
 
   const stops = useMemo(() => {
-    const s = [{ t: '07:00', label: `Picked up: ${trip.pickup}` }];
-    trip.itinerary.forEach((d) => s.push({ t: `Day ${d.day}`, label: d.title }));
-    s.push({ t: 'End', label: `Drop-off in ${trip.start}` });
+    const s = [{ t: '07:00', label: `${tx('Picked up:')} ${trip.pickup}` }];
+    trip.itinerary.forEach((d) => s.push({ t: `${tx('Day')} ${d.day}`, label: d.title }));
+    s.push({ t: tx('End'), label: tx('Drop-off in {place}', { place: trip.start }) });
     return s;
   }, [trip]);
 
@@ -47,16 +49,14 @@ export default function Live() {
     <section className="live">
       <div className="live__head">
         <span className="live__badge">
-          <Radio size={16} aria-hidden="true" /> Live
-        </span>
-        <h1>{b ? `${b.lead.name.split(' ')[0]}’s group` : 'Sample group'}: {trip.name}</h1>
+          <Radio size={16} aria-hidden="true" />{' '}{tx("Live")}</span>
+        <h1>{b ? tx('{name}’s group', { name: b.lead.name.split(' ')[0] }) : tx('Sample group')}: {trip.name}</h1>
         <p className="muted">
-          {b ? fmtDate(parseIso(b.date), { weekday: 'long', day: 'numeric', month: 'long' }) : 'Demo trip'}. This page is for family and friends at home; no app or login needed.
-        </p>
+          {b ? fmtDate(parseIso(b.date), { weekday: 'long', day: 'numeric', month: 'long' }) : 'Demo trip'}{tx(". This page is for family and friends at home; no app or login needed.")}</p>
       </div>
       <div className="live__grid">
         <div className="live__map">
-          <svg viewBox="0 0 400 260" role="img" aria-label="Route map with the group's position">
+          <svg viewBox="0 0 400 260" role="img" aria-label={tx("Route map with the group's position")}>
             <rect width="400" height="260" rx="20" fill="#DCEBEE" />
             <path d="M0 230 C80 210 140 240 220 220 S340 200 400 215 V260 H0Z" fill="#CFE3DF" />
             <path d="M260 60 l30 -40 l30 40z M300 70 l24 -32 l24 32z" fill="#A9C2CC" />
@@ -77,12 +77,10 @@ export default function Live() {
           </svg>
           <div className="live__controls">
             <button type="button" className="btn btn--primary btn--sm" onClick={() => setPlaying(!playing)}>
-              {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />} {playing ? 'Pause' : 'Play trip'}
+              {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />} {playing ? tx('Pause') : tx('Play trip')}
             </button>
           </div>
-          <label className="live__sim">
-            Simulate trip time
-            <input type="range" min={0} max={100} value={progress} onChange={(e) => (setPlaying(false), setProgress(Number(e.target.value)))} />
+          <label className="live__sim">{tx("Simulate trip time")}<input type="range" min={0} max={100} value={progress} onChange={(e) => (setPlaying(false), setProgress(Number(e.target.value)))} />
           </label>
         </div>
         <div className="live__side">
@@ -90,9 +88,9 @@ export default function Live() {
             <div className="live__photo">
               <Photo id={gallery[current % gallery.length]} width={960} sizes="420px" />
             </div>
-            <span className="muted">Now</span>
+            <span className="muted">{tx("Now")}</span>
             <strong>{stops[current].label}</strong>
-            <span className="muted">Last check-in by {g.name}, a few minutes ago</span>
+            <span className="muted">{tx("Last check-in by")}{' '}{g.name}{tx(", a few minutes ago")}</span>
           </motion.div>
           <ol className="live__timeline">
             {stops.map((s, i) => (
@@ -105,19 +103,15 @@ export default function Live() {
           <div className="live__guide">
             <div>
               <strong>{g.name}</strong>
-              <span className="muted">Guide, speaks {g.langs}</span>
+              <span className="muted">{tx("Guide, speaks")}{' '}{g.langs}</span>
             </div>
             <span className="live__battery">
-              <BatteryMedium size={16} aria-hidden="true" /> Guide phone online
-            </span>
+              <BatteryMedium size={16} aria-hidden="true" />{' '}{tx("Guide phone online")}</span>
             <a className="btn btn--ghost btn--sm" href="tel:+77000000000">
-              <Phone size={16} aria-hidden="true" /> Call the 24/7 line
-            </a>
+              <Phone size={16} aria-hidden="true" />{' '}{tx("Call the 24/7 line")}</a>
           </div>
           {b && (
-            <Link to={`/pass/${b.code}`} className="btn btn--link">
-              Back to the Trip Pass
-            </Link>
+            <Link to={`/pass/${b.code}`} className="btn btn--link">{tx("Back to the Trip Pass")}</Link>
           )}
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { LangProvider, useT } from './lib/i18n';
 import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { lazy, Suspense } from 'react';
 import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
@@ -18,13 +19,12 @@ const TripPage = lazy(() => import('./pages/Trip'));
 const Trust = lazy(() => import('./pages/Trust'));
 
 function NotFound() {
+  const tx = useT();
   return (
     <section className="section narrow">
-      <h1>This page doesn’t exist</h1>
-      <p>The link may be old. Start from the trips page.</p>
-      <Link to="/" className="btn btn--primary">
-        Show all trips
-      </Link>
+      <h1>{tx("This page doesn’t exist")}</h1>
+      <p>{tx("The link may be old. Start from the trips page.")}</p>
+      <Link to="/" className="btn btn--primary">{tx("Show all trips")}</Link>
     </section>
   );
 }
@@ -58,6 +58,7 @@ export default function App() {
   return (
     <HashRouter>
       <MotionConfig reducedMotion="user">
+      <LangProvider>
       <ToastProvider>
         <StoreProvider>
           <ChatProvider>
@@ -67,6 +68,7 @@ export default function App() {
           </ChatProvider>
         </StoreProvider>
       </ToastProvider>
+      </LangProvider>
       </MotionConfig>
     </HashRouter>
   );

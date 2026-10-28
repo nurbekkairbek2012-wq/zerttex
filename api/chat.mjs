@@ -1,5 +1,5 @@
 // Vercel serverless function: POST /api/chat
-// Set ANTHROPIC_API_KEY in Vercel -> Project -> Settings -> Environment Variables to switch Tulpar to Claude.
+// Set GEMINI_API_KEY in Vercel -> Project -> Settings -> Environment Variables to switch Tulpar to Gemini (never commit the key).
 import { handleChat } from '../shared/tulpar-core.mjs';
 
 export default async function handler(req, res) {

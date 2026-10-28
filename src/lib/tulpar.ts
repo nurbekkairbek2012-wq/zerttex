@@ -7,7 +7,12 @@
  * by /api/chat (Claude Haiku with the knowledge base as context); the UI falls back to
  * this engine when the API is not configured, so the demo always works.
  */
-import { company, fmtDate, guides, inclusionLabels, isoDate, parseIso, policies, tripById, trips, upcomingDepartures, type Trip } from './kb';
+import { company, fmtDate, guides, inclusionLabels, isoDate, parseIso, policies, tripById, trips, tripsEn, upcomingDepartures, type Trip } from './kb';
+import { plural, tr } from './i18n';
+
+// Chips are sent back to this engine when tapped, so they stay in English (the chat shows them translated).
+const enShort = (id: string) => tripsEn.find((x) => x.id === id)!.short;
+const enDay = (d: Date) => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
 import { money, type Currency } from './money';
 import type { Meal } from './store';
 
@@ -26,6 +31,8 @@ export interface ChatMsg {
   trips?: string[];
   quote?: Quote;
   handoff?: boolean;
+  /** What the chat shows for a user message when it differs from what the engine got (translated chips). */
+  shown?: string;
 }
 
 export interface Slots {
@@ -48,7 +55,7 @@ export const userMsg = (text: string): ChatMsg => ({ id: id(), from: 'user', tex
 
 export const welcome = (): ChatMsg =>
   bot(
-    `Hi, I'm ${company.assistant}, the trip assistant of ${company.name}. I can show you trips, explain exactly what's included, and book seats for you in this chat. Where would you like to go?`,
+    tr("Hi, I'm {assistant}, the trip assistant of {company}. I can show you trips, explain exactly what's included, and book seats for you in this chat. Where would you like to go?", { assistant: tr(company.assistant), company: company.name }),
     { chips: ['Show me the trips', 'Kolsai lakes for 2 next Friday', 'Is it safe to pay?', 'Do I need a visa?'] },
   );
 
@@ -161,13 +168,13 @@ export function departureFor(trip: Trip, wanted: Date): Date {
 // ---------- answers ----------
 
 function tripLine(t: Trip, cur: Currency) {
-  return `${t.name}: ${t.days} days from ${t.start}, ${money(t.priceKZT, cur)} per person, all inclusive`;
+  return tr('{trip}: {n} days from {place}, {price} per person, all inclusive', { trip: t.name, n: t.days, place: t.start, price: money(t.priceKZT, cur) });
 }
 
 function inclusionsText(t: Trip) {
   const inc = t.included.map((k) => `✓ ${inclusionLabels[k]}`).join('\n');
   const not = t.notIncluded.map((k) => `✗ ${k}`).join('\n');
-  return `Included in ${t.name}:\n${inc}\n\nNot included:\n${not}`;
+  return `${tr('Included in {trip}:', { trip: t.name })}\n${inc}\n\n${tr('Not included:')}\n${not}`;
 }
 
 type Intent =
@@ -221,11 +228,11 @@ export function respond(text: string, prev: Slots, cur: Currency, now = new Date
   const out: ChatMsg[] = [];
 
   if (/\bchange (the )?date\b/.test(t) && prev.last) {
-    const tr = tripById(prev.last.tripId)!;
-    slots = { ...emptySlots(), booking: true, tripId: tr.id, people: prev.last.people, meal: prev.last.meal, askedMeal: true };
+    const trp = tripById(prev.last.tripId)!;
+    slots = { ...emptySlots(), booking: true, tripId: trp.id, people: prev.last.people, meal: prev.last.meal, askedMeal: true };
     return {
       slots,
-      messages: [bot(`Sure. Pick another ${tr.name} departure:`, { chips: upcomingDepartures(tr, 4).map((d) => fmtDate(d, { weekday: 'long', day: 'numeric', month: 'short' })) })],
+      messages: [bot(tr('Sure. Pick another {trip} departure:', { trip: trp.name }), { chips: upcomingDepartures(trp, 4).map(enDay) })],
     };
   }
 
@@ -259,110 +266,110 @@ export function respond(text: string, prev: Slots, cur: Currency, now = new Date
   // --- informational intents answer first; booking continues after ---
   // Topics outside the approved knowledge base: never guess, hand over to a person.
   if (has('unknown') && !has('payment') && !has('upi')) {
-    out.push(bot(`Good question. I only answer from information our team has checked, and I don't have that yet, so I've asked a person from our team to reply here. Usually under 10 minutes between 8:00 and 23:00 Astana time.`, { handoff: true }));
+    out.push(bot(tr("Good question. I only answer from information our team has checked, and I don't have that yet, so I've asked a person from our team to reply here. Usually under 10 minutes between 8:00 and 23:00 Astana time."), { handoff: true }));
     return { slots, messages: out };
   }
   if (has('human')) {
-    out.push(bot(`I'll bring in a person from our Astana team. Average reply time is under 10 minutes from 8:00 to 23:00 Astana time. Meanwhile I'm still here if you have questions.`, { handoff: true }));
+    out.push(bot(tr("I'll bring in a person from our Astana team. Average reply time is under 10 minutes from 8:00 to 23:00 Astana time. Meanwhile I'm still here if you have questions."), { handoff: true }));
     return { slots, messages: out };
   }
   if (has('hindi')) {
-    out.push(bot(`Namaste! Right now I answer in English; Hindi replies are part of the full launch. Ask me anything in simple English and I'll keep it short.`, { chips: ['Show me the trips', 'What is included?'] }));
+    out.push(bot(tr("Namaste! This offline demo understands questions in simple English. With the AI mode on, you can chat fully in Hindi: switch the site to हिन्दी at the top."), { chips: ['Show me the trips', 'What is included?'] }));
   }
   if (has('greet') && found.length === 1 && !tripId && !people && !date) {
     out.push(welcome());
     return { slots, messages: out };
   }
   if (has('thanks') && found.length === 1 && !slots.booking) {
-    out.push(bot('Happy to help. Anything else about the trip?', { chips: ['Show me the trips', 'Talk to a person'] }));
+    out.push(bot(tr('Happy to help. Anything else about the trip?'), { chips: ['Show me the trips', 'Talk to a person'] }));
     return { slots, messages: out };
   }
   if (has('list') && !trip) {
-    out.push(bot(`Here are our trips. Prices are per person and include transport, guide, stay, meals and park fees:\n${trips.map((x) => `• ${tripLine(x, cur)}`).join('\n')}`, { trips: trips.map((x) => x.id), chips: ['Kolsai lakes for 2 next Friday', 'Which is easiest for parents?'] }));
+    out.push(bot(`${tr('Here are our trips. Prices are per person and include transport, guide, stay, meals and park fees:')}\n${trips.map((x) => `• ${tripLine(x, cur)}`).join('\n')}`, { trips: trips.map((x) => x.id), chips: ['Kolsai lakes for 2 next Friday', 'Which is easiest for parents?'] }));
   }
   if (has('price')) {
-    const forGroup = trip && slots.people && slots.people > 1 ? ` For ${slots.people} travelers: ${money(trip.priceKZT * slots.people, cur)} in total.` : '';
-    if (trip) out.push(bot(`${tripLine(trip, cur)}.${forGroup} No extra fees at checkout. ${policies.deposit}`, { chips: ['What is included?', `Book ${trip.short}`] }));
-    else out.push(bot(`Per person, all inclusive:\n${trips.map((x) => `• ${tripLine(x, cur)}`).join('\n')}`, { chips: ['What is included?', 'How do I pay?'] }));
+    const forGroup = trip && slots.people && slots.people > 1 ? ` ${tr('For {n} travelers: {price} in total.', { n: slots.people, price: money(trip.priceKZT * slots.people, cur) })}` : '';
+    if (trip) out.push(bot(`${tripLine(trip, cur)}.${forGroup} ${tr('No extra fees at checkout.')} ${policies.deposit}`, { chips: ['What is included?', `Book ${enShort(trip.id)}`] }));
+    else out.push(bot(`${tr('Per person, all inclusive:')}\n${trips.map((x) => `• ${tripLine(x, cur)}`).join('\n')}`, { chips: ['What is included?', 'How do I pay?'] }));
   }
   if (has('included')) {
     const x = trip ?? tripById('kolsai-kaindy')!;
-    out.push(bot(inclusionsText(x), { chips: [`Book ${x.short}`, 'Vegetarian food?'] }));
+    out.push(bot(inclusionsText(x), { chips: [`Book ${enShort(x.id)}`, 'Vegetarian food?'] }));
   }
   if (has('deposit')) out.push(bot(`${policies.deposit} ${policies.cancellation}`));
-  if (has('food') && !(prev.booking && meal)) out.push(bot(`${policies.food} Our guesthouse hosts cook a vegetarian menu every day (rice, lentil soup, vegetable plov, salads, bread and fruit).`));
+  if (has('food') && !(prev.booking && meal)) out.push(bot(`${policies.food} ${tr('Our guesthouse hosts cook a vegetarian menu every day (rice, lentil soup, vegetable plov, salads, bread and fruit).')}`));
   if (has('visa')) out.push(bot(policies.visa, { chips: ['Flights from India', 'Show me the trips'] }));
-  if (has('flight')) out.push(bot(`${policies.flights} Flights are not included, so you can use your own airline miles. We pick you up from your hotel or the airport.`));
-  if (has('upi')) out.push(bot(`${policies.upi}\n\nTip for Indian cards: ${policies.indianCards.replace('Indian bank cards: ', '')}`));
-  if (has('payment') && !has('upi')) out.push(bot(`${policies.payments}\n\nTip for Indian cards: ${policies.indianCards.replace('Indian bank cards: ', '')}`, { chips: ['Can I pay a deposit?', 'Split with friends'] }));
+  if (has('flight')) out.push(bot(`${policies.flights} ${tr('Flights are not included, so you can use your own airline miles. We pick you up from your hotel or the airport.')}`));
+  if (has('upi')) out.push(bot(`${policies.upi}\n\n${tr('Tip for Indian cards:')} ${policies.indianCards.replace(tr('Indian bank cards: '), '')}`));
+  if (has('payment') && !has('upi')) out.push(bot(`${policies.payments}\n\n${tr('Tip for Indian cards:')} ${policies.indianCards.replace(tr('Indian bank cards: '), '')}`, { chips: ['Can I pay a deposit?', 'Split with friends'] }));
   if (has('refund')) out.push(bot(`${policies.cancellation} ${policies.weather} ${policies.promise}`));
-  if (has('trust')) out.push(bot(`Fair question. ${company.name} has run trips since ${company.founded} with ${company.guides} local guides and ${company.travelers2025.toLocaleString('en-US')} travelers in 2025. Every guide has a verified profile and video intro, only travelers who actually went can leave reviews, and payments go through a licensed Kazakhstan bank with 3-D Secure. ${policies.promise}`, { chips: ['Open the Trust page', 'Meet the guides'] }));
+  if (has('trust')) out.push(bot(`${tr('Fair question. {company} has run trips since {year} with {guides} local guides and {travelers} travelers in 2025. Every guide has a verified profile and video intro, only travelers who actually went can leave reviews, and payments go through a licensed Kazakhstan bank with 3-D Secure.', { company: company.name, year: company.founded, guides: company.guides, travelers: company.travelers2025.toLocaleString('en-US') })} ${policies.promise}`, { chips: ['Open the Trust page', 'Meet the guides'] }));
   if (has('weatherPolicy')) out.push(bot(`${policies.weather} ${policies.promise}`));
   if (has('changes') && !prev.last) out.push(bot(`${policies.changes} ${policies.cancellation}`));
-  if (has('group')) out.push(bot(trip ? `${trip.name}: ${trip.groupSize}. ${policies.groups.split('. ')[1]}` : policies.groups));
+  if (has('group')) out.push(bot(trip ? `${trip.name}: ${trip.groupSize}. ${policies.groups.split('. ').slice(1).join('. ')}` : policies.groups));
   if (has('insurance')) out.push(bot(policies.insurance));
   if (has('guideInfo') && !has('included')) {
     const g = trip ? guides[trip.guide] : undefined;
-    out.push(bot(g ? `Your guide on ${trip!.name} is ${g.name}: ${g.years} years guiding, speaks ${g.langs}. ${g.bio} You can watch a one-minute video intro on the trip page before you pay.` : `Every group has an English-speaking local guide with a checked ID and first-aid certificate. Each guide has a profile and a one-minute video intro on the trip page.`, { chips: ['Meet the guides'] }));
+    out.push(bot(g ? `${tr('Your guide on {trip} is {name}: {years} years guiding, speaks {langs}.', { trip: trip!.name, name: g.name, years: g.years, langs: g.langs })} ${g.bio} ${tr('You can watch a one-minute video intro on the trip page before you pay.')}` : tr('Every group has an English-speaking local guide with a checked ID and first-aid certificate. Each guide has a profile and a one-minute video intro on the trip page.'), { chips: ['Meet the guides'] }));
   }
   if (has('stay') && !has('visa') && !has('included')) {
     const x = trip;
-    out.push(bot(x ? `On ${x.name} you stay in ${x.itinerary.map((d) => d.text).join(' ').match(/(guesthouse|yurt eco-camp|resort|Caravanserai)/gi)?.filter((v, i, a) => a.indexOf(v) === i).join(' and ') ?? 'comfortable local places'}. Rooms are twin share; a single room costs extra.` : `Nights are in family guesthouses (Kolsai), a yurt eco-camp (Charyn), the Caravanserai complex (Turkestan) or a lakeside resort (Burabay). Rooms are twin share and included in the price.`));
+    out.push(bot(x ? tr('On {trip} you stay in {places}. Rooms are twin share; a single room costs extra.', { trip: x.name, places: tripsEn.find((e) => e.id === x.id)!.itinerary.map((d) => d.text).join(' ').match(/(guesthouse|yurt eco-camp|resort|Caravanserai)/gi)?.filter((v, i, a) => a.indexOf(v) === i).map((v) => tr(v)).join(tr(' and ')) ?? tr('comfortable local places') }) : tr('Nights are in family guesthouses (Kolsai), a yurt eco-camp (Charyn), the Caravanserai complex (Turkestan) or a lakeside resort (Burabay). Rooms are twin share and included in the price.')));
   }
   if (has('season') && !has('weatherPolicy')) {
-    if (trip) out.push(bot(`Best season for ${trip.name}: ${trip.season}.`));
+    if (trip) out.push(bot(tr('Best season for {trip}: {season}.', { trip: trip.name, season: trip.season })));
     else out.push(bot(trips.map((x) => `• ${x.name}: ${x.season}`).join('\n')));
   }
   if (has('difficulty')) {
     if (trip) out.push(bot(`${trip.name}: ${trip.difficulty}. ${trip.groupSize}.`));
-    else out.push(bot(`Easiest for parents and kids: Burabay Lakes and Turkestan Silk Road (flat, short walks). Kolsai has longer optional hikes.`, { chips: ['Burabay for 4', 'Turkestan for 3'] }));
+    else out.push(bot(tr('Easiest for parents and kids: Burabay Lakes and Turkestan Silk Road (flat, short walks). Kolsai has longer optional hikes.'), { chips: ['Burabay for 4', 'Turkestan for 3'] }));
   }
-  if (has('pack')) out.push(bot('Bring comfortable walking shoes, a warm layer (mountain evenings are cool even in summer), sunscreen, a power bank and your passport. We provide water.'));
-  if (has('split')) out.push(bot(policies.split + ' Choose "Split with friends" at checkout and each person gets their own payment link.', slots.last ? { quote: slots.last } : {}));
+  if (has('pack')) out.push(bot(tr('Bring comfortable walking shoes, a warm layer (mountain evenings are cool even in summer), sunscreen, a power bank and your passport. We provide water.')));
+  if (has('split')) out.push(bot(`${policies.split} ${tr('Choose "Split with friends" at checkout and each person gets their own payment link.')}`, slots.last ? { quote: slots.last } : {}));
   if (has('dates') && trip && !slots.date) {
     const ds = upcomingDepartures(trip, 4).map((d) => fmtDate(d)).join(', ');
-    out.push(bot(`Next ${trip.name} departures: ${ds}. Which one suits you?`, { chips: upcomingDepartures(trip, 3).map((d) => fmtDate(d, { weekday: 'long', day: 'numeric', month: 'short' })) }));
+    out.push(bot(tr('Next {trip} departures: {dates}. Which one suits you?', { trip: trip.name, dates: ds }), { chips: upcomingDepartures(trip, 3).map(enDay) }));
     return { slots, messages: out };
   }
 
   // --- trip mentioned without a question: describe it ---
   if (tripId && !slots.booking && out.length === 0) {
-    const tr = tripById(tripId)!;
-    out.push(bot(`${tr.name}: ${tr.tagline}\n${tr.days} days from ${tr.start}, ${money(tr.priceKZT, cur)} per person all inclusive. Highlights: ${tr.highlights.slice(0, 3).join(', ')}.`, { trips: [tr.id], chips: [`Book ${tr.short}`, 'What is included?', 'Dates'] }));
+    const trp = tripById(tripId)!;
+    out.push(bot(`${trp.name}: ${trp.tagline}\n${tr('{n} days from {place}, {price} per person all inclusive. Highlights: {list}.', { n: trp.days, place: trp.start, price: money(trp.priceKZT, cur), list: trp.highlights.slice(0, 3).join(', ') })}`, { trips: [trp.id], chips: [`Book ${enShort(trp.id)}`, 'What is included?', 'Dates'] }));
     return { slots, messages: out };
   }
 
   // --- booking: fill the slots, then quote ---
   if (slots.booking) {
     if (!slots.tripId) {
-      out.push(bot('Which trip would you like to book?', { chips: trips.map((x) => x.name), trips: trips.map((x) => x.id) }));
+      out.push(bot(tr('Which trip would you like to book?'), { chips: tripsEn.map((x) => x.name), trips: trips.map((x) => x.id) }));
       return { slots, messages: out };
     }
-    const tr = tripById(slots.tripId)!;
+    const trp = tripById(slots.tripId)!;
     const ackParts: string[] = [];
-    if (people && !tripId) ackParts.push(`${people} ${people === 1 ? 'traveler' : 'travelers'}`);
-    if (meal && prev.booking) ackParts.push(`${meal === 'any' ? 'no food preference' : meal + ' meals'}`);
-    const ack = ackParts.length ? `Noted: ${ackParts.join(', ')}. ` : tripId ? 'Great choice. ' : '';
+    if (people && !tripId) ackParts.push(plural(people, '{n} traveler', '{n} travelers'));
+    if (meal && prev.booking) ackParts.push(tr(meal === 'any' ? 'no food preference' : meal === 'veg' ? 'veg meals' : meal === 'jain' ? 'jain meals' : 'halal meals'));
+    const ack = ackParts.length ? `${tr('Noted: {list}.', { list: ackParts.join(', ') })} ` : tripId ? `${tr('Great choice.')} ` : '';
     if (!slots.date) {
-      out.push(bot(`${ack}When would you like to go? ${tr.name} departs ${tr.departures.map((d) => ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'][d]).join(' and ')}.`, { chips: upcomingDepartures(tr, 3).map((d) => fmtDate(d, { weekday: 'long', day: 'numeric', month: 'short' })) }));
+      out.push(bot(`${ack}${tr('When would you like to go? {trip} departs {days}.', { trip: trp.name, days: trp.departures.map((d) => tr(['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'][d])).join(tr(' and ')) })}`, { chips: upcomingDepartures(trp, 3).map(enDay) }));
       return { slots, messages: out };
     }
     if (!slots.people) {
-      out.push(bot(`${ack}How many travelers?`, { chips: ['Just me', '2 people', '4 people', '6 people'] }));
+      out.push(bot(`${ack}${tr('How many travelers?')}`, { chips: ['Just me', '2 people', '4 people', '6 people'] }));
       return { slots, messages: out };
     }
     if (!slots.meal && !slots.askedMeal) {
       slots.askedMeal = true;
-      out.push(bot('Any food preference for the group? Every trip has vegetarian meals.', { chips: ['Vegetarian', 'Jain', 'Halal', 'No preference'] }));
+      out.push(bot(tr('Any food preference for the group? Every trip has vegetarian meals.'), { chips: ['Vegetarian', 'Jain', 'Halal', 'No preference'] }));
       return { slots, messages: out };
     }
-    const q: Quote = { tripId: tr.id, date: slots.date, people: slots.people, meal: slots.meal ?? 'any' };
-    const total = tr.priceKZT * q.people;
+    const q: Quote = { tripId: trp.id, date: slots.date, people: slots.people, meal: slots.meal ?? 'any' };
+    const total = trp.priceKZT * q.people;
     const dep = parseIso(q.date);
-    const wantedNote = slots.wanted && slots.wanted !== q.date ? ` (the nearest departure to your date)` : '';
+    const wantedNote = slots.wanted && slots.wanted !== q.date ? ` ${tr('(the nearest departure to your date)')}` : '';
     out.push(
       bot(
-        `Here is your quote: ${tr.name}, ${fmtDate(dep, { weekday: 'long', day: 'numeric', month: 'long' })}${wantedNote}, ${q.people} ${q.people === 1 ? 'traveler' : 'travelers'}. Total ${money(total, cur)}, nothing extra to pay later. I'm holding the seats for 30 minutes.`,
+        tr("Here is your quote: {trip}, {date}{note}, {who}. Total {price}, nothing extra to pay later. I'm holding the seats for 30 minutes.", { trip: trp.name, date: fmtDate(dep, { weekday: 'long', day: 'numeric', month: 'long' }), note: wantedNote, who: plural(q.people, '{n} traveler', '{n} travelers'), price: money(total, cur) }),
         { quote: q, chips: ['Change date', 'Split with friends', 'Talk to a person'] },
       ),
     );
@@ -371,7 +378,7 @@ export function respond(text: string, prev: Slots, cur: Currency, now = new Date
 
   if (out.length === 0) {
     out.push(
-      bot(`I can help you choose a trip, check dates, explain what's included, and book. For anything else, a person from our team can take over.`, {
+      bot(tr("I can help you choose a trip, check dates, explain what's included, and book. For anything else, a person from our team can take over."), {
         chips: ['Show me the trips', 'Is it safe to pay?', 'Talk to a person'],
       }),
     );

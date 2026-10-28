@@ -1,3 +1,4 @@
+import { useT } from '../lib/i18n';
 import { Link } from 'react-router-dom';
 import { OrnamentBand } from '../components/Art';
 import { CountUp, Reveal, SplitText } from '../components/Motion';
@@ -26,30 +27,29 @@ const weeks = [
   ['1–2', 'Interviews, wireframes, bank and Meta applications'],
   ['3–4', 'Booking core: trips, seats, 3 currencies, admin'],
   ['5–6', 'Payments, deposit and split links, Trip Pass'],
-  ['7–8', 'Tulpar on WhatsApp with Claude, handoff inbox'],
+  ['7–8', 'Tulpar on WhatsApp with Gemini, handoff inbox'],
   ['9–10', 'Trust layer, security and privacy review'],
   ['11–12', 'Beta with 30 Indian students, pilot ads in India'],
 ];
 
 export default function About() {
+  const tx = useT();
   return (
     <div className="about">
       <section className="section narrow">
-        <SplitText text="About this prototype" />
-        <p className="lead">
-          Saryarqa Go is team РыбаЕж’s answer to Zerttex Hackathon 2026, Case 1: help Saryarqa Routes, a small Astana tour company, reach 30% foreign travelers in 24 months. We chose young travelers from India and built the booking experience around the chat they already use.
-        </p>
+        <SplitText key={tx('About this prototype')} text={tx('About this prototype')} />
+        <p className="lead">{tx("Saryarqa Go is team РыбаЕж’s answer to Zerttex Hackathon 2026, Case 1: help Saryarqa Routes, a small Astana tour company, reach 30% foreign travelers in 24 months. We chose young travelers from India and built the booking experience around the chat they already use.")}</p>
       </section>
 
       <section className="section narrow">
-        <h2>Four complaints, four fixes</h2>
+        <h2>{tx("Four complaints, four fixes")}</h2>
         <div className="fixes">
           {problems.map((p) => (
             <motion.div key={p.said} className="fix" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={{ y: -6 }}>
-              <p className="fix__said">{p.said}</p>
-              <p>{p.fix}</p>
+              <p className="fix__said">{tx(p.said)}</p>
+              <p>{tx(p.fix)}</p>
               <Link to={p.to} className="btn btn--ghost btn--sm">
-                {p.cta}
+                {tx(p.cta)}
               </Link>
             </motion.div>
           ))}
@@ -59,14 +59,14 @@ export default function About() {
       <section className="section about-numbers">
         <OrnamentBand className="trust-strip__band" color="#F4B400" />
         <div className="trust-strip__inner">
-          <h2>The case in six numbers</h2>
+          <h2>{tx("The case in six numbers")}</h2>
           <dl className="numbers">
             {numbers.map(([n, pre, suf, l, dec]) => (
               <div key={l}>
                 <dt>
-                  <CountUp to={n} prefix={pre} suffix={suf} decimals={dec ?? 0} />
+                  <CountUp to={n} prefix={pre ? tx(pre) : pre} suffix={suf} decimals={dec ?? 0} />
                 </dt>
-                <dd>{l}</dd>
+                <dd>{tx(l)}</dd>
               </div>
             ))}
           </dl>
@@ -74,45 +74,37 @@ export default function About() {
       </section>
 
       <section className="section narrow">
-        <h2>The 12-week MVP</h2>
+        <h2>{tx("The 12-week MVP")}</h2>
         <ol className="weeks">
           {weeks.map(([w, t]) => (
             <li key={w}>
-              <span>Weeks {w}</span>
-              <p>{t}</p>
+              <span>{tx("Weeks")}{' '}{w}</span>
+              <p>{tx(t)}</p>
             </li>
           ))}
         </ol>
-        <p className="muted">
-          This prototype already covers the MVP scope with simulated payments. The chat runs on a rule-based demo engine and switches to Claude Haiku when an API key is set on the server. Saryarqa Routes is the fictional company from the case; reviews, licence and dashboard figures here are sample data.
-        </p>
+        <p className="muted">{tx("This prototype already covers the MVP scope with simulated payments. The chat runs on a rule-based demo engine and switches to Google Gemini when a GEMINI_API_KEY is set on the server (the key never reaches the browser). Saryarqa Routes is the fictional company from the case; reviews, licence and dashboard figures here are sample data.")}</p>
       </section>
 
       <section className="section narrow">
-        <h2>Team РыбаЕж</h2>
-        <p>Kaiyrbek Nurbek, Zhomart Yerkainar, Kozhakhmet Aldiyar, Alexey Abdunnur. Astana, October 2026.</p>
+        <h2>{tx("Team РыбаЕж")}</h2>
+        <p>{tx("Kaiyrbek Nurbek, Zhomart Yerkainar, Kozhakhmet Aldiyar, Alexey Abdunnur. Astana, October 2026.")}</p>
         <div className="hero__cta">
-          <Link to="/chat" className="btn btn--primary">
-            Book a trip in the chat
-          </Link>
-          <Link to="/operator" className="btn btn--ghost">
-            Open the team dashboard
-          </Link>
+          <Link to="/chat" className="btn btn--primary">{tx("Book a trip in the chat")}</Link>
+          <Link to="/operator" className="btn btn--ghost">{tx("Open the team dashboard")}</Link>
         </div>
       </section>
       <section className="section narrow" id="credits">
         <Reveal>
-          <h2>Photo credits</h2>
-          <p className="muted">All photos are real and come from Wikimedia Commons under free licences. Thank you to the photographers.</p>
+          <h2>{tx("Photo credits")}</h2>
+          <p className="muted">{tx("All photos are real and come from Wikimedia Commons under free licences. Thank you to the photographers.")}</p>
           <ul className="credits">
             {(Object.keys(photos) as PhotoId[]).map((id) => (
               <li key={id}>
                 <Photo id={id} width={500} sizes="72px" />
                 <span>
-                  <b>{photos[id].place}</b>: {photos[id].alt}. {photos[id].author}, {photos[id].license}.{' '}
-                  <a href={commonsPage(id)} target="_blank" rel="noreferrer">
-                    Source
-                  </a>
+                  <b>{tx(photos[id].place)}</b>: {tx(photos[id].alt)}. {photos[id].author}, {photos[id].license}.{' '}
+                  <a href={commonsPage(id)} target="_blank" rel="noreferrer">{tx("Source")}</a>
                 </span>
               </li>
             ))}

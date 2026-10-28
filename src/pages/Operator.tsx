@@ -1,3 +1,4 @@
+import { useT } from '../lib/i18n';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, Bot, CheckCircle2, CreditCard, Globe2, MessageSquare, Send, Users, X } from 'lucide-react';
 import { useState } from 'react';
@@ -28,12 +29,13 @@ const handoffs = [
 ];
 
 function BarChart() {
+  const tx = useT();
   const max = Math.max(...weekly);
   const [hover, setHover] = useState<number | null>(null);
   return (
     <figure className="chart">
-      <figcaption>Foreign travelers booked per week, pilot weeks 1–12</figcaption>
-      <svg viewBox="0 0 360 160" role="img" aria-label={`Weekly foreign travelers: ${weekly.join(', ')}`}>
+      <figcaption>{tx("Foreign travelers booked per week, pilot weeks 1–12")}</figcaption>
+      <svg viewBox="0 0 360 160" role="img" aria-label={`${tx('Weekly foreign travelers:')} ${weekly.join(', ')}`}>
         {[0, 0.5, 1].map((f) => (
           <line key={f} x1="28" x2="356" y1={140 - f * 120} y2={140 - f * 120} stroke="var(--line)" strokeWidth="1" />
         ))}
@@ -57,8 +59,7 @@ function BarChart() {
               {hover === i && (
                 <g>
                   <rect x={Math.min(x - 24, 290)} y={140 - h - 30} width="70" height="22" rx="6" fill="var(--ink)" />
-                  <text x={Math.min(x - 24, 290) + 35} y={140 - h - 15} textAnchor="middle" className="tip">
-                    Week {i + 1}: {v}
+                  <text x={Math.min(x - 24, 290) + 35} y={140 - h - 15} textAnchor="middle" className="tip">{tx("Week")}{' '}{i + 1}: {v}
                   </text>
                 </g>
               )}
@@ -71,6 +72,7 @@ function BarChart() {
 }
 
 export default function Operator() {
+  const tx = useT();
   const { bookings, currency } = useStore();
   const toast = useToast();
   const [queue, setQueue] = useState(handoffs);
@@ -84,7 +86,7 @@ export default function Operator() {
   const send = () => {
     if (!replying || !reply.trim()) return;
     setQueue((q) => q.filter((h) => h.who !== replying.who));
-    toast('Reply sent on WhatsApp. Tulpar has the conversation history.');
+    toast(tx('Reply sent on WhatsApp. Tulpar has the conversation history.'));
     setReplying(null);
     setReply('');
   };
@@ -104,26 +106,24 @@ export default function Operator() {
     <section className="ops">
       <div className="ops__head">
         <div>
-          <h1>Team dashboard</h1>
-          <p className="muted">What the Saryarqa Routes team sees every morning. Sample pilot data; your own test bookings appear in the table.</p>
+          <h1>{tx("Team dashboard")}</h1>
+          <p className="muted">{tx("What the Saryarqa Routes team sees every morning. Sample pilot data; your own test bookings appear in the table.")}</p>
         </div>
-        <Link to="/" className="btn btn--ghost btn--sm">
-          Open the traveler site
-        </Link>
+        <Link to="/" className="btn btn--ghost btn--sm">{tx("Open the traveler site")}</Link>
       </div>
 
       <div className="goal">
         <div className="goal__text">
           <Globe2 aria-hidden="true" />
           <div>
-            <strong>{foreignNow}% of this month’s travelers came from abroad</strong>
-            <span className="muted">Goal: {goal}% within 24 months (2025 baseline: 4%)</span>
+            <strong>{foreignNow}{tx("% of this month’s travelers came from abroad")}</strong>
+            <span className="muted">{tx("Goal:")}{' '}{goal}{tx("% within 24 months (2025 baseline: 4%)")}</span>
           </div>
         </div>
-        <div className="meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={foreignNow} aria-label="Share of foreign travelers">
+        <div className="meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={foreignNow} aria-label={tx("Share of foreign travelers")}>
           <motion.div className="meter__fill" initial={{ width: 0 }} animate={{ width: `${foreignNow}%` }} transition={{ duration: 1.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }} />
           <div className="meter__goal" style={{ left: `${goal}%` }}>
-            <span>Goal {goal}%</span>
+            <span>{tx("Goal")}{' '}{goal}%</span>
           </div>
           <div className="meter__base" style={{ left: '4%' }} />
         </div>
@@ -132,27 +132,27 @@ export default function Operator() {
       <div className="tiles">
         <div className="tile">
           <MessageSquare aria-hidden="true" />
-          <span>Chat to paid booking</span>
+          <span>{tx("Chat to paid booking")}</span>
           <strong><CountUp to={12.4} decimals={1} suffix="%" /></strong>
-          <small>51 of 412 conversations</small>
+          <small>{tx("51 of 412 conversations")}</small>
         </div>
         <div className="tile">
           <Bot aria-hidden="true" />
-          <span>Answered by Tulpar alone</span>
+          <span>{tx("Answered by Tulpar alone")}</span>
           <strong><CountUp to={78} suffix="%" /></strong>
-          <small>22% handed to the team</small>
+          <small>{tx("22% handed to the team")}</small>
         </div>
         <div className="tile">
           <CreditCard aria-hidden="true" />
-          <span>Foreign card success</span>
+          <span>{tx("Foreign card success")}</span>
           <strong><CountUp to={91} suffix="%" /></strong>
-          <small>Target 90% or higher</small>
+          <small>{tx("Target 90% or higher")}</small>
         </div>
         <div className="tile">
           <Users aria-hidden="true" />
-          <span>Foreign travelers, 12 weeks</span>
+          <span>{tx("Foreign travelers, 12 weeks")}</span>
           <strong><CountUp to={weekly.reduce((a, b) => a + b, 0)} /></strong>
-          <small>{money(weekly.reduce((a, b) => a + b, 0) * 66000, currency)} revenue</small>
+          <small>{money(weekly.reduce((a, b) => a + b, 0) * 66000, currency)}{' '}{tx("revenue")}</small>
         </div>
       </div>
 
@@ -162,12 +162,12 @@ export default function Operator() {
         </div>
         <div className="panel">
           <figure className="chart">
-            <figcaption>Booking funnel, last 30 days</figcaption>
+            <figcaption>{tx("Booking funnel, last 30 days")}</figcaption>
             <ul className="funnel">
               {funnel.map((f) => (
                 <li key={f.label}>
-                  <motion.div className="funnel__bar" initial={{ width: 0 }} whileInView={{ width: `${(f.v / funnel[0].v) * 100}%` }} viewport={{ once: true }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} title={`${f.label}: ${f.v}`} />
-                  <span className="funnel__label">{f.label}</span>
+                  <motion.div className="funnel__bar" initial={{ width: 0 }} whileInView={{ width: `${(f.v / funnel[0].v) * 100}%` }} viewport={{ once: true }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} title={`${tx(f.label)}: ${f.v}`} />
+                  <span className="funnel__label">{tx(f.label)}</span>
                   <b>{f.v}</b>
                 </li>
               ))}
@@ -178,40 +178,38 @@ export default function Operator() {
 
       <div className="ops__grid">
         <div className="panel">
-          <h2>Waiting for a person</h2>
+          <h2>{tx("Waiting for a person")}</h2>
           <ul className="handoffs">
             <AnimatePresence>
             {queue.length === 0 && (
               <motion.li key="empty" className="handoffs__empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <CheckCircle2 size={18} aria-hidden="true" /> Inbox zero. Every traveler has an answer.
-              </motion.li>
+                <CheckCircle2 size={18} aria-hidden="true" />{' '}{tx("Inbox zero. Every traveler has an answer.")}</motion.li>
             )}
             {queue.map((h, i) => (
               <motion.li key={h.who} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 80, height: 0 }} transition={{ delay: i * 0.05 }}>
                 <AlertCircle size={18} aria-hidden="true" />
                 <div>
-                  <strong>{h.q}</strong>
+                  <strong>{tx(h.q)}</strong>
                   <span className="muted">
-                    {h.who}, waiting {h.wait}
+                    {h.who}{tx(", waiting")}{' '}{h.wait}
                   </span>
                 </div>
-                <button type="button" className="btn btn--ghost btn--sm" onClick={() => (setReplying(h), setReply(templates[handoffs.indexOf(h)] ?? ''))}>
-                  Reply
-                </button>
+                <button type="button" className="btn btn--ghost btn--sm" onClick={() => (setReplying(h), setReply(tx(templates[handoffs.indexOf(h)] ?? '')))}>{tx("Reply")}</button>
               </motion.li>
             ))}
             </AnimatePresence>
           </ul>
         </div>
         <div className="panel">
-          <h2>Next departures</h2>
+          <h2>{tx("Next departures")}</h2>
+          <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
-                <th>Trip</th>
-                <th>Date</th>
-                <th>Seats</th>
-                <th>Guide</th>
+                <th>{tx("Trip")}</th>
+                <th>{tx("Date")}</th>
+                <th>{tx("Seats")}</th>
+                <th>{tx("Guide")}</th>
               </tr>
             </thead>
             <tbody>
@@ -227,23 +225,24 @@ export default function Operator() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
       <div className="panel">
-        <h2>Latest bookings</h2>
+        <h2>{tx("Latest bookings")}</h2>
         <div className="table-wrap">
           <table className="table">
             <thead>
               <tr>
-                <th>Code</th>
-                <th>Lead traveler</th>
-                <th>Country</th>
-                <th>Trip</th>
-                <th>People</th>
-                <th>Food</th>
-                <th>Channel</th>
-                <th>Paid</th>
+                <th>{tx("Code")}</th>
+                <th>{tx("Lead traveler")}</th>
+                <th>{tx("Country")}</th>
+                <th>{tx("Trip")}</th>
+                <th>{tx("People")}</th>
+                <th>{tx("Food")}</th>
+                <th>{tx("Channel")}</th>
+                <th>{tx("Paid")}</th>
               </tr>
             </thead>
             <tbody>
@@ -251,11 +250,11 @@ export default function Operator() {
                 <tr key={r.code} className={r.mine ? 'is-mine' : ''}>
                   <td>{r.mine ? <Link to={`/pass/${r.code}`}>{r.code}</Link> : r.code}</td>
                   <td>{r.name}</td>
-                  <td>{r.country}</td>
+                  <td>{tx(r.country)}</td>
                   <td>{tripById(r.trip)?.name}</td>
                   <td>{r.people}</td>
-                  <td>{mealLabel[r.meal]}</td>
-                  <td>{r.ch}</td>
+                  <td>{tx(mealLabel[r.meal])}</td>
+                  <td>{tx(r.ch)}</td>
                   <td>
                     {money(r.paid, currency)} / {money(r.total, currency)}
                   </td>
@@ -264,29 +263,26 @@ export default function Operator() {
             </tbody>
           </table>
         </div>
-        {bookings.length > 0 && <p className="muted">Highlighted rows are bookings you made in this browser ({fmtDate(parseIso(bookings[0].date))} is the next one).</p>}
+        {bookings.length > 0 && <p className="muted">{tx("Highlighted rows are bookings you made in this browser (")}{fmtDate(parseIso(bookings[0].date))}{' '}{tx("is the next one).")}</p>}
       </div>
       <AnimatePresence>
         {replying && (
-          <motion.div className="modal" role="dialog" aria-modal="true" aria-label="Reply to traveler" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setReplying(null)}>
+          <motion.div className="modal" role="dialog" aria-modal="true" aria-label={tx("Reply to traveler")} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setReplying(null)}>
             <motion.div className="modal__box" initial={{ y: 40, scale: 0.92 }} animate={{ y: 0, scale: 1 }} exit={{ y: 20, opacity: 0 }} onClick={(e) => e.stopPropagation()}>
-              <button type="button" className="icon-btn modal__close" onClick={() => setReplying(null)} aria-label="Close">
+              <button type="button" className="icon-btn modal__close" onClick={() => setReplying(null)} aria-label={tx("Close")}>
                 <X />
               </button>
-              <h3>Reply on WhatsApp</h3>
+              <h3>{tx("Reply on WhatsApp")}</h3>
               <p className="muted">{replying.who}</p>
               <div className="msg msg--user">
                 <div className="msg__bubble">
-                  <p>{replying.q}</p>
+                  <p>{tx(replying.q)}</p>
                 </div>
               </div>
-              <label className="reply-box">
-                Your answer (Tulpar suggested a draft)
-                <textarea value={reply} onChange={(e) => setReply(e.target.value)} rows={4} />
+              <label className="reply-box">{tx("Your answer (Tulpar suggested a draft)")}<textarea value={reply} onChange={(e) => setReply(e.target.value)} rows={4} />
               </label>
               <button type="button" className="btn btn--primary" onClick={send} disabled={!reply.trim()}>
-                <Send size={16} aria-hidden="true" /> Send reply
-              </button>
+                <Send size={16} aria-hidden="true" />{' '}{tx("Send reply")}</button>
             </motion.div>
           </motion.div>
         )}

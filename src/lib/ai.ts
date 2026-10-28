@@ -3,12 +3,14 @@ import type { Currency } from './money';
 import type { Meal } from './store';
 import { departureFor, respond, type ChatMsg, type EngineResult, type Quote, type Slots } from './tulpar';
 import { isoDate, parseIso } from './kb';
+import { getLang } from './i18n';
 
 /**
- * Chat transport. Tries the serverless AI endpoint first (/api/chat, Claude Haiku with the
- * knowledge base); if it is not deployed or has no API key, the offline demo engine answers.
+ * Chat transport. Tries the serverless AI endpoint first (/api/chat: Google Gemini, or Claude, with
+ * the knowledge base; the API key lives only on the server). If it is not deployed or has no key,
+ * the offline demo engine answers.
  */
-export type Engine = 'claude' | 'demo';
+export type Engine = 'gemini' | 'claude' | 'demo';
 let remoteDisabled = false;
 
 interface RemoteReply {
@@ -16,6 +18,7 @@ interface RemoteReply {
   chips?: string[];
   quote?: { tripId: string; date: string; people: number; meal?: Meal } | null;
   handoff?: boolean;
+  engine?: 'gemini' | 'claude';
 }
 
 export async function ask(
@@ -33,6 +36,7 @@ export async function ask(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           currency: cur,
+          lang: getLang(),
           today: isoDate(new Date()),
           messages: [...history, { from: 'user', text }]
             .slice(-12)
@@ -58,7 +62,7 @@ export async function ask(
             quote,
             handoff: data.handoff,
           };
-          return { slots, messages: [msg], engine: 'claude' };
+          return { slots, messages: [msg], engine: data.engine === 'claude' ? 'claude' : 'gemini' };
         }
       }
       remoteDisabled = true; // 404 / 501 (no key) -> stop trying for this session

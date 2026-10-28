@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useLang } from './i18n';
 import { ask, type Engine } from './ai';
 import { useStore } from './store';
 import { emptySlots, userMsg, welcome, type ChatMsg, type Slots } from './tulpar';
@@ -7,7 +8,8 @@ interface ChatState {
   messages: ChatMsg[];
   typing: boolean;
   engine: Engine;
-  send: (text: string) => Promise<void>;
+  /** text goes to the engine; display (optional) is what the user bubble shows, e.g. a translated chip. */
+  send: (text: string, display?: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -23,10 +25,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const history = useRef<ChatMsg[]>(messages);
 
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, display?: string) => {
       const clean = text.trim();
       if (!clean) return;
-      const u = userMsg(clean);
+      const u = { ...userMsg(clean), shown: display?.trim() || undefined };
       history.current = [...history.current, u];
       setMessages(history.current);
       setTyping(true);
@@ -42,6 +44,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     },
     [currency],
   );
+
+  // A new language: if the traveler hasn't written yet, greet again in that language.
+  const { lang } = useLang();
+  useEffect(() => {
+    if (history.current.length === 1 && history.current[0].from === 'bot') {
+      history.current = [welcome()];
+      setMessages(history.current);
+    }
+  }, [lang]);
 
   const reset = useCallback(() => {
     slots.current = emptySlots();

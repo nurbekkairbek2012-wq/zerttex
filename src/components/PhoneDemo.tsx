@@ -1,3 +1,4 @@
+import { useT } from '../lib/i18n';
 import { CheckCircle2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { departureFor } from '../lib/tulpar';
@@ -10,6 +11,7 @@ import { InclusionList } from './Ticket';
 
 /** The hero: a booking happening inside one chat, played once on load. */
 export function PhoneDemo() {
+  const tx = useT();
   const { currency } = useStore();
   const trip = tripById('kolsai-kaindy')!;
   const today = new Date();
@@ -33,22 +35,22 @@ export function PhoneDemo() {
   }, [reduce, round]);
 
   return (
-    <div className="phone" aria-label="Example: booking a trip in a chat">
+    <div className="phone" aria-label={tx("Example: booking a trip in a chat")}>
       <div className="phone__notch" />
       <div className="phone__head">
         <div className="chat-head__avatar">
           <Shanyrak size={18} />
         </div>
         <div>
-          <strong>Saryarqa Routes</strong>
-          <span>Tulpar, booking assistant</span>
+          <strong>{tx("Saryarqa Routes")}</strong>
+          <span>{tx("Tulpar, booking assistant")}</span>
         </div>
       </div>
       <div className="phone__body">
         {step >= 1 && (
           <div className="msg msg--user pop">
             <div className="msg__bubble">
-              <p>Hi! Two of us want to see Kolsai lakes next Friday. We are vegetarian.</p>
+              <p>{tx("Hi! Two of us want to see Kolsai lakes next Friday. We are vegetarian.")}</p>
             </div>
           </div>
         )}
@@ -64,17 +66,15 @@ export function PhoneDemo() {
         {step >= 2 && (
           <div className="msg msg--bot pop">
             <div className="msg__bubble">
-              <p>
-                Lovely choice. Here is everything for {fmtDate(dep, { weekday: 'short', day: 'numeric', month: 'short' })}, 2 travelers, vegetarian meals:
-              </p>
+              <p>{tx("Lovely choice. Here is everything for")}{' '}{fmtDate(dep, { weekday: 'short', day: 'numeric', month: 'short' })}{tx(", 2 travelers, vegetarian meals:")}</p>
             </div>
             <div className="demo-card">
               <Photo id="kaindy" width={500} sizes="320px" className="demo-card__art" />
               <div className="demo-card__body">
-                <strong>{trip.name}, 3 days</strong>
+                <strong>{trip.name}, {tx('{n} days', { n: 3 })}</strong>
                 <InclusionList trip={{ ...trip, included: trip.included.slice(0, 5) }} compact />
                 <div className="demo-card__total">
-                  <span>Total, all included</span>
+                  <span>{tx("Total, all included")}</span>
                   <b>{money(total, currency)}</b>
                 </div>
               </div>
@@ -84,28 +84,28 @@ export function PhoneDemo() {
         {step >= 3 && (
           <div className="msg msg--user pop">
             <div className="msg__bubble">
-              <p>Can I pay with my Indian card?</p>
+              <p>{tx("Can I pay with my Indian card?")}</p>
             </div>
           </div>
         )}
         {step >= 4 && (
           <div className="msg msg--bot pop">
             <div className="msg__bubble">
-              <p>Yes: Visa, Mastercard, Apple Pay or Google Pay. Pay 20% now to hold the seats, the rest before the trip.</p>
+              <p>{tx("Yes: Visa, Mastercard, Apple Pay or Google Pay. Pay 20% now to hold the seats, the rest before the trip.")}</p>
             </div>
           </div>
         )}
         {step >= 5 && (
           <div className="msg msg--user pop">
             <div className="msg__bubble msg__bubble--action">
-              <p>Pay 20% now ({money(deposit, currency)})</p>
+              <p>{tx("Pay 20% now (")}{money(deposit, currency)})</p>
             </div>
           </div>
         )}
         {step >= 6 && (
           <div className="demo-paid pop">
             <CheckCircle2 size={18} aria-hidden="true" />
-            <span>Seats booked. Trip Pass sent to your phone.</span>
+            <span>{tx("Seats booked. Trip Pass sent to your phone.")}</span>
           </div>
         )}
       </div>

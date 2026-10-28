@@ -1,3 +1,4 @@
+import { tr, useT } from '../lib/i18n';
 import { CalendarPlus, CheckCircle2, Copy, MapPinned, MessageCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -17,6 +18,7 @@ function shareUrl(path: string) {
 }
 
 export default function Pass() {
+  const tx = useT();
   const { code } = useParams();
   const [sp] = useSearchParams();
   const { bookings, currency, updateBooking } = useStore();
@@ -24,7 +26,7 @@ export default function Pass() {
   // A shared link opened on another device still shows a sample pass instead of an error.
   const b = found ?? {
     code: code ?? 'SG-DEMO1', tripId: 'kolsai-kaindy', date: isoDate(upcomingDepartures(tripById('kolsai-kaindy')!, 1)[0]), people: 2, meal: 'veg' as const,
-    lead: { name: 'Sample traveler', email: '', phone: '', country: 'India' }, payMode: 'deposit' as const, totalKZT: 158000, paidKZT: 31600,
+    lead: { name: tr('Sample traveler'), email: '', phone: '', country: 'India' }, payMode: 'deposit' as const, totalKZT: 158000, paidKZT: 31600,
     createdAt: new Date().toISOString(), channel: 'web' as const,
   };
   const [copied, setCopied] = useState('');
@@ -40,7 +42,7 @@ export default function Pass() {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(what);
-      toast(what === 'live' ? 'Live link copied. Send it to your family.' : 'Payment link copied.');
+      toast(what === 'live' ? tx('Live link copied. Send it to your family.') : tx('Payment link copied.'));
       setTimeout(() => setCopied(''), 2000);
     } catch {
       setCopied('');
@@ -55,7 +57,7 @@ export default function Pass() {
       'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Saryarqa Go//EN', 'BEGIN:VEVENT',
       `UID:${b.code}@saryarqa.go`, `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${e}`,
       `SUMMARY:${trip.name} (${b.code})`, `LOCATION:${trip.pickup}`,
-      `DESCRIPTION:Guide ${g.name}. Trip Pass ${b.code}. Live link for family: ${liveLink}`, 'END:VEVENT', 'END:VCALENDAR',
+      `DESCRIPTION:${tx('Guide')} ${g.name}. Trip Pass ${b.code}. ${tx('Live link for family:')} ${liveLink}`, 'END:VEVENT', 'END:VCALENDAR',
     ].join('\r\n');
     const url = URL.createObjectURL(new Blob([body], { type: 'text/calendar' }));
     const a = document.createElement('a');
@@ -63,10 +65,10 @@ export default function Pass() {
     a.download = `${b.code}.ics`;
     a.click();
     URL.revokeObjectURL(url);
-    toast('Calendar file downloaded.');
+    toast(tx('Calendar file downloaded.'));
   };
 
-  const waText = encodeURIComponent(`We're going to ${trip.name} on ${fmtDate(dep, { day: 'numeric', month: 'long' })}! Follow our trip live: ${liveLink}`);
+  const waText = encodeURIComponent(tx('We’re going to {trip} on {date}! Follow our trip live: {link}', { trip: trip.name, date: fmtDate(dep, { day: 'numeric', month: 'long' }), link: liveLink }));
 
   return (
     <section className="pass-page">
@@ -74,8 +76,8 @@ export default function Pass() {
         <motion.div className="success" role="status" initial={{ opacity: 0, y: -20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.5, type: 'spring' }}>
           <CheckCircle2 aria-hidden="true" />
           <div>
-            <strong>Payment confirmed. Your seats are booked.</strong>
-            <p>We sent this Trip Pass to {b.lead.email || 'your email'} and WhatsApp. Your guide will message you the day before.</p>
+            <strong>{tx("Payment confirmed. Your seats are booked.")}</strong>
+            <p>{tx("We sent this Trip Pass to")}{' '}{b.lead.email || 'your email'}{' '}{tx("and WhatsApp. Your guide will message you the day before.")}</p>
           </div>
         </motion.div>
       )}
@@ -90,7 +92,7 @@ export default function Pass() {
         <div className="pass__top">
           <Photo id={coverOf(trip.id)} width={1280} sizes="880px" className="pass__art" eager />
           <div className="pass__title">
-            <span>{found ? 'Trip Pass' : 'Sample Trip Pass (booking made on another device)'}</span>
+            <span>{found ? tx('Trip Pass') : tx('Sample Trip Pass (booking made on another device)')}</span>
             <h1>{trip.name}</h1>
             <p>{fmtDate(dep, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
           </div>
@@ -98,44 +100,44 @@ export default function Pass() {
         <OrnamentBand className="pass__band" color="#F4B400" />
         <div className="pass__grid">
           <div className="pass__qr">
-            <QR value={shareUrl(`/pass/${b.code}`)} label={`QR code for Trip Pass ${b.code}`} />
+            <QR value={shareUrl(`/pass/${b.code}`)} label={`${tx('QR code for Trip Pass')} ${b.code}`} />
             <strong className="pass__code">{b.code}</strong>
-            <span className="muted">Show this to your guide at pickup</span>
+            <span className="muted">{tx("Show this to your guide at pickup")}</span>
           </div>
           <dl className="pass__facts">
             <div>
-              <dt>Lead traveler</dt>
+              <dt>{tx("Lead traveler")}</dt>
               <dd>{b.lead.name}</dd>
             </div>
             <div>
-              <dt>Travelers</dt>
+              <dt>{tx("Travelers")}</dt>
               <dd>{b.people}</dd>
             </div>
             <div>
-              <dt>Food</dt>
-              <dd>{mealLabel[b.meal]}</dd>
+              <dt>{tx("Food")}</dt>
+              <dd>{tx(mealLabel[b.meal])}</dd>
             </div>
             <div>
-              <dt>Pickup</dt>
+              <dt>{tx("Pickup")}</dt>
               <dd>{trip.pickup}</dd>
             </div>
             <div>
-              <dt>Guide</dt>
+              <dt>{tx("Guide")}</dt>
               <dd>
                 {g.name}, {g.langs.split(',')[0]}
               </dd>
             </div>
             <div>
-              <dt>Paid</dt>
+              <dt>{tx("Paid")}</dt>
               <dd>
-                {money(b.paidKZT, currency)} of {money(b.totalKZT, currency)}
+                {money(b.paidKZT, currency)}{' '}{tx("of")}{' '}{money(b.totalKZT, currency)}
               </dd>
             </div>
             {remaining > 0 && (
               <div>
-                <dt>Left to pay</dt>
+                <dt>{tx("Left to pay")}</dt>
                 <dd>
-                  {money(remaining, currency)} by {fmtDate(new Date(dep.getTime() - 2 * 864e5), { day: 'numeric', month: 'short' })}
+                  {money(remaining, currency)}{' '}{tx("by")}{' '}{fmtDate(new Date(dep.getTime() - 2 * 864e5), { day: 'numeric', month: 'short' })}
                 </dd>
               </div>
             )}
@@ -144,18 +146,18 @@ export default function Pass() {
 
         {b.split && (
           <div className="pass__split">
-            <h2>Split payment</h2>
+            <h2>{tx("Split payment")}</h2>
             <ul>
               {b.split.map((s, i) => (
                 <li key={i}>
                   <span>{s.name}</span>
                   <span>{money(s.amountKZT, currency)}</span>
                   {s.paid ? (
-                    <span className="paid">Paid</span>
+                    <span className="paid">{tx("Paid")}</span>
                   ) : (
                     <span className="split__actions">
                       <button type="button" className="btn btn--ghost btn--sm" onClick={() => copy(shareUrl(`/book/${trip.id}?date=${b.date}&people=1&mode=full`), `link${i}`)}>
-                        {copied === `link${i}` ? 'Link copied' : 'Copy pay link'}
+                        {copied === `link${i}` ? tx('Link copied') : tx('Copy pay link')}
                       </button>
                       <button
                         type="button"
@@ -167,9 +169,7 @@ export default function Pass() {
                             paidKZT: b.paidKZT + s.amountKZT,
                           })
                         }
-                      >
-                        Mark as paid (demo)
-                      </button>
+                      >{tx("Mark as paid (demo)")}</button>
                     </span>
                   )}
                 </li>
@@ -180,20 +180,16 @@ export default function Pass() {
 
         <div className="pass__actions">
           <Link to={`/live/${b.code}`} className="btn btn--primary">
-            <MapPinned size={18} aria-hidden="true" /> Open live trip view
-          </Link>
+            <MapPinned size={18} aria-hidden="true" />{' '}{tx("Open live trip view")}</Link>
           <button type="button" className="btn btn--ghost" onClick={() => copy(liveLink, 'live')}>
-            <Copy size={18} aria-hidden="true" /> {copied === 'live' ? 'Copied' : 'Copy link for family'}
+            <Copy size={18} aria-hidden="true" /> {copied === 'live' ? tx('Copied') : tx('Copy link for family')}
           </button>
           <a className="btn btn--ghost" href={`https://wa.me/?text=${waText}`} target="_blank" rel="noreferrer">
-            <Share2 size={18} aria-hidden="true" /> Share on WhatsApp
-          </a>
+            <Share2 size={18} aria-hidden="true" />{' '}{tx("Share on WhatsApp")}</a>
           <button type="button" className="btn btn--ghost" onClick={ics}>
-            <CalendarPlus size={18} aria-hidden="true" /> Add to calendar
-          </button>
+            <CalendarPlus size={18} aria-hidden="true" />{' '}{tx("Add to calendar")}</button>
           <Link to="/chat" className="btn btn--link">
-            <MessageCircle size={18} aria-hidden="true" /> Questions? Ask Tulpar
-          </Link>
+            <MessageCircle size={18} aria-hidden="true" />{' '}{tx("Questions? Ask Tulpar")}</Link>
         </div>
       </motion.article>
     </section>

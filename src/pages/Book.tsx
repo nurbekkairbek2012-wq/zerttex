@@ -1,3 +1,4 @@
+import { useT } from '../lib/i18n';
 import { CreditCard, Info, Lock, ShieldCheck, Smartphone, Users } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -11,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 type Step = 'details' | 'pay' | 'otp' | 'processing';
 
 export default function Book() {
+  const tx = useT();
   const { id } = useParams();
   const trip = tripById(id);
   const [sp] = useSearchParams();
@@ -32,10 +34,8 @@ export default function Book() {
   if (!trip) {
     return (
       <section className="section narrow">
-        <h1>This trip is not available</h1>
-        <Link to="/" className="btn btn--primary">
-          Choose another trip
-        </Link>
+        <h1>{tx("This trip is not available")}</h1>
+        <Link to="/" className="btn btn--primary">{tx("Choose another trip")}</Link>
       </section>
     );
   }
@@ -46,9 +46,9 @@ export default function Book() {
 
   const submitDetails = (e: FormEvent) => {
     e.preventDefault();
-    if (lead.name.trim().length < 2) return setError('Enter the lead traveler’s full name as in the passport.');
-    if (!/^\S+@\S+\.\S+$/.test(lead.email)) return setError('Enter an email address, for example name@gmail.com.');
-    if (lead.phone.replace(/\D/g, '').length < 10) return setError('Enter a WhatsApp number with country code, for example +91 98765 43210.');
+    if (lead.name.trim().length < 2) return setError(tx('Enter the lead traveler’s full name as in the passport.'));
+    if (!/^\S+@\S+\.\S+$/.test(lead.email)) return setError(tx('Enter an email address, for example name@gmail.com.'));
+    if (lead.phone.replace(/\D/g, '').length < 10) return setError(tx('Enter a WhatsApp number with country code, for example +91 98765 43210.'));
     setError('');
     setStep('pay');
   };
@@ -60,7 +60,7 @@ export default function Book() {
 
   const confirmOtp = (e: FormEvent) => {
     e.preventDefault();
-    if (otp.trim() !== '123456') return setError('The code is not correct. In this demo the bank code is 123456.');
+    if (otp.trim() !== '123456') return setError(tx('The code is not correct. In this demo the bank code is 123456.'));
     setError('');
     setStep('processing');
     const code = makeCode();
@@ -78,7 +78,7 @@ export default function Book() {
       channel: sp.get('ch') === 'chat' ? 'chat' : 'web',
       split:
         mode === 'split'
-          ? [{ name: lead.name || 'You', amountKZT: share, paid: true }, ...friends.map((f, i) => ({ name: f || `Friend ${i + 1}`, amountKZT: share, paid: false }))]
+          ? [{ name: lead.name || tx('You'), amountKZT: share, paid: true }, ...friends.map((f, i) => ({ name: f || `${tx('Friend')} ${i + 1}`, amountKZT: share, paid: false }))]
           : undefined,
     };
     setTimeout(() => {
@@ -92,181 +92,141 @@ export default function Book() {
     <section className="checkout">
       <div className="checkout__main">
         <p className="crumbs">
-          <Link to={`/trips/${trip.id}`}>{trip.name}</Link> / Booking
-        </p>
-        <h1>Book {trip.name}</h1>
-        <ol className="progress" aria-label="Booking steps">
-          <li className={step === 'details' ? 'is-on' : 'is-done'}>Travelers</li>
-          <li className={step === 'pay' ? 'is-on' : step === 'details' ? '' : 'is-done'}>Payment</li>
-          <li className={step === 'otp' || step === 'processing' ? 'is-on' : ''}>Confirm</li>
+          <Link to={`/trips/${trip.id}`}>{trip.name}</Link>{' '}{tx("/ Booking")}</p>
+        <h1>{tx("Book")}{' '}{trip.name}</h1>
+        <ol className="progress" aria-label={tx("Booking steps")}>
+          <li className={step === 'details' ? 'is-on' : 'is-done'}>{tx("Travelers")}</li>
+          <li className={step === 'pay' ? 'is-on' : step === 'details' ? '' : 'is-done'}>{tx("Payment")}</li>
+          <li className={step === 'otp' || step === 'processing' ? 'is-on' : ''}>{tx("Confirm")}</li>
         </ol>
 
         <AnimatePresence mode="wait">
         {step === 'details' && (
           <motion.form key="details" className="form" onSubmit={submitDetails} noValidate initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
-            <h2>Lead traveler</h2>
+            <h2>{tx("Lead traveler")}</h2>
             <div className="form__grid">
-              <label>
-                Full name as in passport
-                <input value={lead.name} onChange={(e) => setLead({ ...lead, name: e.target.value })} autoComplete="name" required />
+              <label>{tx("Full name as in passport")}<input value={lead.name} onChange={(e) => setLead({ ...lead, name: e.target.value })} autoComplete="name" required />
               </label>
-              <label>
-                Email for the Trip Pass
-                <input type="email" value={lead.email} onChange={(e) => setLead({ ...lead, email: e.target.value })} autoComplete="email" required />
+              <label>{tx("Email for the Trip Pass")}<input type="email" value={lead.email} onChange={(e) => setLead({ ...lead, email: e.target.value })} autoComplete="email" required />
               </label>
-              <label>
-                WhatsApp number
-                <input type="tel" value={lead.phone} onChange={(e) => setLead({ ...lead, phone: e.target.value })} autoComplete="tel" required />
+              <label>{tx("WhatsApp number")}<input type="tel" value={lead.phone} onChange={(e) => setLead({ ...lead, phone: e.target.value })} autoComplete="tel" required />
               </label>
-              <label>
-                Country
-                <select value={lead.country} onChange={(e) => setLead({ ...lead, country: e.target.value })}>
+              <label>{tx("Country")}<select value={lead.country} onChange={(e) => setLead({ ...lead, country: e.target.value })}>
                   {['India', 'United Arab Emirates', 'Nepal', 'Sri Lanka', 'United Kingdom', 'Other'].map((c) => (
-                    <option key={c}>{c}</option>
+                    <option key={c} value={c}>{tx(c)}</option>
                   ))}
                 </select>
               </label>
             </div>
-            <h2>Food for the group</h2>
+            <h2>{tx("Food for the group")}</h2>
             <div className="seg">
               {(['veg', 'jain', 'halal', 'any'] as Meal[]).map((m) => (
                 <button key={m} type="button" className={meal === m ? 'is-on' : ''} onClick={() => setMeal(m)} aria-pressed={meal === m}>
-                  {m === 'veg' ? 'Vegetarian' : m === 'jain' ? 'Jain' : m === 'halal' ? 'Halal' : 'No preference'}
+                  {tx(m === 'veg' ? 'Vegetarian' : m === 'jain' ? 'Jain' : m === 'halal' ? 'Halal' : 'No preference')}
                 </button>
               ))}
             </div>
             <p className="hint">
-              <Info size={16} aria-hidden="true" /> We need passport details only after payment, for hotel registration (eQonaq). You can add them later in the Trip Pass.
-            </p>
+              <Info size={16} aria-hidden="true" />{' '}{tx("We need passport details only after payment, for hotel registration (eQonaq). You can add them later in the Trip Pass.")}</p>
             {error && (
               <p className="error" role="alert">
                 {error}
               </p>
             )}
-            <button type="submit" className="btn btn--primary btn--lg">
-              Continue to payment
-            </button>
+            <button type="submit" className="btn btn--primary btn--lg">{tx("Continue to payment")}</button>
           </motion.form>
         )}
 
         {step === 'pay' && (
           <motion.form key="pay" className="form" onSubmit={pay} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}>
-            <h2>How do you want to pay?</h2>
-            <div className="paymodes" role="radiogroup" aria-label="Payment plan">
+            <h2>{tx("How do you want to pay?")}</h2>
+            <div className="paymodes" role="radiogroup" aria-label={tx("Payment plan")}>
               <button type="button" role="radio" aria-checked={mode === 'deposit'} className={`paymode ${mode === 'deposit' ? 'is-on' : ''}`} onClick={() => setMode('deposit')}>
-                <strong>Pay 20% now</strong>
-                <span>{money(Math.round(total * 0.2), currency)} today, the rest 48 hours before the trip</span>
+                <strong>{tx("Pay 20% now")}</strong>
+                <span>{money(Math.round(total * 0.2), currency)}{' '}{tx("today, the rest 48 hours before the trip")}</span>
               </button>
               <button type="button" role="radio" aria-checked={mode === 'full'} className={`paymode ${mode === 'full' ? 'is-on' : ''}`} onClick={() => setMode('full')}>
-                <strong>Pay in full</strong>
-                <span>{money(total, currency)} today, nothing later</span>
+                <strong>{tx("Pay in full")}</strong>
+                <span>{money(total, currency)}{' '}{tx("today, nothing later")}</span>
               </button>
               {people > 1 && (
                 <button type="button" role="radio" aria-checked={mode === 'split'} className={`paymode ${mode === 'split' ? 'is-on' : ''}`} onClick={() => setMode('split')}>
                   <strong>
-                    <Users size={16} aria-hidden="true" /> Split with friends
-                  </strong>
-                  <span>
-                    You pay {money(share, currency)}, each friend gets a link for their share
-                  </span>
+                    <Users size={16} aria-hidden="true" />{' '}{tx("Split with friends")}</strong>
+                  <span>{tx("You pay")}{' '}{money(share, currency)}{tx(", each friend gets a link for their share")}</span>
                 </button>
               )}
             </div>
 
             {mode === 'split' && (
               <div className="split">
-                <p>Names of the friends who will get a payment link (optional):</p>
+                <p>{tx("Names of the friends who will get a payment link (optional):")}</p>
                 {friends.map((f, i) => (
-                  <label key={i}>
-                    Friend {i + 1}
+                  <label key={i}>{tx("Friend")}{' '}{i + 1}
                     <input value={f} onChange={(e) => setFriends(friends.map((x, j) => (j === i ? e.target.value : x)))} />
                   </label>
                 ))}
-                <p className="hint">Seats are held for 24 hours while friends pay.</p>
+                <p className="hint">{tx("Seats are held for 24 hours while friends pay.")}</p>
               </div>
             )}
 
-            <h2>Payment method</h2>
-            <div className="methods" role="radiogroup" aria-label="Payment method">
+            <h2>{tx("Payment method")}</h2>
+            <div className="methods" role="radiogroup" aria-label={tx("Payment method")}>
               <button type="button" role="radio" aria-checked={method === 'card'} className={`method ${method === 'card' ? 'is-on' : ''}`} onClick={() => setMethod('card')}>
-                <CreditCard size={18} aria-hidden="true" /> Card
-              </button>
+                <CreditCard size={18} aria-hidden="true" />{' '}{tx("Card")}</button>
               <button type="button" role="radio" aria-checked={method === 'apple'} className={`method ${method === 'apple' ? 'is-on' : ''}`} onClick={() => setMethod('apple')}>
-                <Smartphone size={18} aria-hidden="true" /> Apple Pay
-              </button>
+                <Smartphone size={18} aria-hidden="true" />{' '}{tx("Apple Pay")}</button>
               <button type="button" role="radio" aria-checked={method === 'google'} className={`method ${method === 'google' ? 'is-on' : ''}`} onClick={() => setMethod('google')}>
-                <Smartphone size={18} aria-hidden="true" /> Google Pay
-              </button>
+                <Smartphone size={18} aria-hidden="true" />{' '}{tx("Google Pay")}</button>
             </div>
 
             {method === 'card' && (
               <div className="card-form">
-                <p className="demo-note">
-                  Demo mode: no real payment is made. Use the test card below and do not enter real card details.
-                </p>
+                <p className="demo-note">{tx("Demo mode: no real payment is made. Use the test card below and do not enter real card details.")}</p>
                 <div className="form__grid">
-                  <label className="span-2">
-                    Card number
-                    <input value="4242 4242 4242 4242" readOnly inputMode="numeric" />
+                  <label className="span-2">{tx("Card number")}<input value="4242 4242 4242 4242" readOnly inputMode="numeric" />
                   </label>
-                  <label>
-                    Expiry
-                    <input value="12 / 29" readOnly />
+                  <label>{tx("Expiry")}<input value="12 / 29" readOnly />
                   </label>
-                  <label>
-                    CVC
-                    <input value="123" readOnly />
+                  <label>{tx("CVC")}<input value="123" readOnly />
                   </label>
                 </div>
               </div>
             )}
 
             <div className="india-tip">
-              <strong>Paying with an Indian card?</strong>
-              <p>
-                New Indian cards have international and online use switched off by default (RBI rules). Open your bank app, turn on “international transactions” and “online”, then pay. It takes about 30 seconds.
-              </p>
+              <strong>{tx("Paying with an Indian card?")}</strong>
+              <p>{tx("New Indian cards have international and online use switched off by default (RBI rules). Open your bank app, turn on “international transactions” and “online”, then pay. It takes about 30 seconds.")}</p>
             </div>
 
             <button type="submit" className="btn btn--primary btn--lg btn--block">
-              <Lock size={18} aria-hidden="true" /> Pay {money(dueNow, currency)}
+              <Lock size={18} aria-hidden="true" />{' '}{tx("Pay")}{' '}{money(dueNow, currency)}
             </button>
             <p className="secure">
-              <ShieldCheck size={16} aria-hidden="true" /> Secured by a licensed Kazakhstan acquiring bank with 3-D Secure. Charged as {money(dueNow, 'KZT')}; your bank converts with no extra fee from us. Card details never reach Saryarqa Routes.
-            </p>
-            <button type="button" className="btn btn--link" onClick={() => setStep('details')}>
-              Back to traveler details
-            </button>
+              <ShieldCheck size={16} aria-hidden="true" />{' '}{tx("Secured by a licensed Kazakhstan acquiring bank with 3-D Secure. Charged as")}{' '}{money(dueNow, 'KZT')}{tx("; your bank converts with no extra fee from us. Card details never reach Saryarqa Routes.")}</p>
+            <button type="button" className="btn btn--link" onClick={() => setStep('details')}>{tx("Back to traveler details")}</button>
           </motion.form>
         )}
 
         {(step === 'otp' || step === 'processing') && (
           <motion.form key="otp" className="form bank" onSubmit={confirmOtp} initial={{ opacity: 0, scale: 0.92, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0 }}>
             <div className="bank__head">
-              <Lock size={18} aria-hidden="true" /> Your bank: 3-D Secure check
-            </div>
+              <Lock size={18} aria-hidden="true" />{' '}{tx("Your bank: 3-D Secure check")}</div>
             {step === 'otp' ? (
               <>
-                <p>
-                  Your bank sent a one-time code to {lead.phone.trim() || 'your phone'} to confirm a payment of {money(dueNow, 'KZT')} to SARYARQA ROUTES, ASTANA.
-                </p>
-                <label>
-                  One-time code (demo: 123456)
-                  <input value={otp} onChange={(e) => setOtp(e.target.value)} inputMode="numeric" autoComplete="one-time-code" autoFocus />
+                <p>{tx("Your bank sent a one-time code to")}{' '}{lead.phone.trim() || tx('your phone')}{' '}{tx("to confirm a payment of")}{' '}{money(dueNow, 'KZT')}{' '}{tx("to SARYARQA ROUTES, ASTANA.")}</p>
+                <label>{tx("One-time code (demo: 123456)")}<input value={otp} onChange={(e) => setOtp(e.target.value)} inputMode="numeric" autoComplete="one-time-code" autoFocus />
                 </label>
                 {error && (
                   <p className="error" role="alert">
                     {error}
                   </p>
                 )}
-                <button type="submit" className="btn btn--primary btn--lg">
-                  Confirm payment
-                </button>
+                <button type="submit" className="btn btn--primary btn--lg">{tx("Confirm payment")}</button>
               </>
             ) : (
               <div className="processing" role="status">
-                <span className="spinner" aria-hidden="true" /> Confirming with your bank and issuing your Trip Pass…
-              </div>
+                <span className="spinner" aria-hidden="true" />{' '}{tx("Confirming with your bank and issuing your Trip Pass…")}</div>
             )}
           </motion.form>
         )}
@@ -277,15 +237,15 @@ export default function Book() {
         <TripTicket tripId={trip.id} date={date} people={people} meal={meal} actions={false} />
         <div className="summary">
           <div>
-            <span>Departure</span>
+            <span>{tx("Departure")}</span>
             <b>{fmtDate(parseIso(date), { weekday: 'long', day: 'numeric', month: 'long' })}</b>
           </div>
           <div>
-            <span>Due today</span>
+            <span>{tx("Due today")}</span>
             <b>{money(dueNow, currency)}</b>
           </div>
           <div>
-            <span>Free cancellation until</span>
+            <span>{tx("Free cancellation until")}</span>
             <b>{fmtDate(new Date(parseIso(date).getTime() - 3 * 864e5), { day: 'numeric', month: 'long' })}</b>
           </div>
         </div>
